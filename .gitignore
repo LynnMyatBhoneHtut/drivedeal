@@ -1,0 +1,16 @@
+# Dependencies and build output
+node_modules/
+dist/
+
+# Each person's own database password - commit api/db.example.php instead
+api/db.php
+
+# Photos uploaded while testing (the folder itself stays via .gitkeep)
+uploads/*
+!uploads/.gitkeep
+
+# Editor / OS junk
+.DS_Store
+Thumbs.db
+*.log
+.idea/

@@ -1,0 +1,18 @@
+/* Site-wide styles. OWNER: Lai (layout and look).
+   Page-specific styles go in each page's own <style scoped> block instead. */
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#app {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
