@@ -8,6 +8,7 @@ api/db.php
 # Photos uploaded while testing (the folder itself stays via .gitkeep)
 uploads/*
 !uploads/.gitkeep
+!uploads/sample/
 
 # Editor / OS junk
 .DS_Store
