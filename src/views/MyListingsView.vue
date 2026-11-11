@@ -208,7 +208,7 @@ onBeforeUnmount(() => document.body.classList.remove('modal-open'))
                   No photo
                 </div>
                 <span
-                  class="badge position-absolute top-0 start-0 m-2"
+                  class="badge position-absolute top-0 end-0 m-2"
                   :class="STATUS_BADGES[car.status]"
                 >
                   {{ statusLabel(car.status) }}
