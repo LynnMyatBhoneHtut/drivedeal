@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import Pagination from '../components/Pagination.vue'
 import CarCard from '../components/CarCard.vue'
 import SearchBar from '../components/SearchBar.vue'
+import SmartMatch from '../components/SmartMatch.vue'
 
 // Temporary sample data
 const cars = [
@@ -106,7 +107,7 @@ watch(filters, () => {
         Explore available cars and find the right one for you.
       </p>
     </div>
-
+    <SmartMatch :cars="cars" />
     <SearchBar v-model="filters" />
 
     <p class="text-muted" role="status">
