@@ -1,39 +1,45 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import CarCard from '../components/CarCard.vue'
+import { apiGet } from '../services/api'
 
+// Keep the existing hero image
 const heroImage = `${import.meta.env.BASE_URL}images/hero-car.jpg`
 
-// Temporary featured cars for testing.
-// Replace these with data from the API later.
-const featuredCars = [
-  {
-    listing_id: 1,
-    make: 'Toyota',
-    model: 'Corolla Cross',
-    year: 2022,
-    price: 105000,
-    mileage_km: 35000,
-    image_path: ''
-  },
-  {
-    listing_id: 2,
-    make: 'Honda',
-    model: 'Civic',
-    year: 2021,
-    price: 89000,
-    mileage_km: 48000,
-    image_path: ''
-  },
-  {
-    listing_id: 3,
-    make: 'Perodua',
-    model: 'Myvi',
-    year: 2023,
-    price: 48000,
-    mileage_km: 18000,
-    image_path: ''
+// Featured vehicles retrieved from Feenix MySQL
+const featuredCars = ref([])
+const loading = ref(true)
+const errorMessage = ref('')
+
+// Load the three newest non-sold listings
+async function loadFeaturedCars() {
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    const data = await apiGet('listings.php', {
+      sort: 'newest',
+      page: 1,
+      perPage: 3
+    })
+
+    if (!Array.isArray(data.cars)) {
+      throw new Error('Invalid car listing data received.')
+    }
+
+    featuredCars.value = data.cars
+  } catch (error) {
+    errorMessage.value =
+      error.message || 'Unable to load featured cars.'
+  } finally {
+    loading.value = false
   }
-]
+}
+
+// Fetch car listings when the Home page opens
+onMounted(() => {
+  loadFeaturedCars()
+})
 </script>
 
 <template>
@@ -107,11 +113,33 @@ class="d-flex flex-wrap justify-content-between
         </router-link>
       </div>
 
-      <div class="row g-4">
+
+      <!-- Loading state -->
+      <div v-if="loading" class="alert alert-info" role="status">
+        Loading featured cars...
+      </div>
+
+      <!-- Error state -->
+      <div v-else-if="errorMessage" class="alert alert-danger" role="alert">
+        <p>{{ errorMessage }}</p>
+
+        <button type="button" class="btn btn-outline-danger btn-sm" @click="loadFeaturedCars">
+          Try Again
+        </button>
+      </div>
+
+      <!-- Featured car listings -->
+      <div v-else-if="featuredCars.length" class="row g-4">
         <div v-for="car in featuredCars" :key="car.listing_id" class="col-12 col-md-6 col-lg-4">
           <CarCard :car="car" />
         </div>
       </div>
+
+      <!-- Empty state -->
+      <div v-else class="alert alert-info">
+        No featured cars are available at the moment.
+      </div>
+
     </section>
 
     <!-- How it works -->

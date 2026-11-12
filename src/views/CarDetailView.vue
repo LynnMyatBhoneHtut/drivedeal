@@ -1,6 +1,6 @@
 <script setup>
-import { computed, ref } from 'vue'
-import { apiPost } from '../services/api'
+import { ref, watch } from 'vue'
+import { apiGet, apiPost } from '../services/api'
 import { currentUser } from '../services/auth'
 import ImageGallery from '../components/ImageGallery.vue'
 import LikeButton from '../components/LikeButton.vue'
@@ -12,37 +12,33 @@ const props = defineProps({
   }
 })
 
-// Temporary sample data until API integration
-const demoCars = [
-  {
-    listing_id: 1,
-    make: 'Toyota',
-    model: 'Corolla Cross',
-    year: 2022,
-    price: 105000,
-    mileage_km: 35000
-  },
-  {
-    listing_id: 2,
-    make: 'Honda',
-    model: 'Civic',
-    year: 2021,
-    price: 89000,
-    mileage_km: 48000
-  },
-  {
-    listing_id: 3,
-    make: 'Perodua',
-    model: 'Myvi',
-    year: 2023,
-    price: 48000,
-    mileage_km: 18000
-  }
-]
 
-const car = computed(() =>
-  demoCars.find(item => String(item.listing_id) === props.id)
-)
+const car = ref(null)
+const loading = ref(true)
+const loadError = ref('')
+
+// Retrieve vehicle details from Feenix MySQL
+async function loadCar(id) {
+  loading.value = true
+  loadError.value = ''
+  car.value = null
+
+  try {
+    const data = await apiGet('listings.php', { id })
+
+    if (!data || Number(data.listing_id) !== Number(id)) {
+      throw new Error('Invalid vehicle data received.')
+    }
+
+    car.value = data
+  } catch (error) {
+    loadError.value =
+      error.message || 'Unable to load vehicle details.'
+  } finally {
+    loading.value = false
+  }
+}
+
 
 function formatNumber(value) {
   return Number(value).toLocaleString('en-MY')
@@ -53,6 +49,17 @@ const message = ref('')
 const isSending = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
+// Reload when the selected vehicle changes
+watch(
+  () => props.id,
+  (id) => {
+    message.value = ''
+    successMessage.value = ''
+    errorMessage.value = ''
+    loadCar(id)
+  },
+  { immediate: true }
+)
 
 async function sendInquiry() {
   successMessage.value = ''
@@ -96,10 +103,16 @@ async function sendInquiry() {
       &larr; Back to Browse Cars
     </router-link>
 
-    <template v-if="car">
-      <p class="text-muted small">
-        Sample listing for layout testing
-      </p>
+
+    <div v-if="loading" class="alert alert-info" role="status">
+      Loading vehicle details...
+    </div>
+
+    <div v-else-if="loadError" class="alert alert-danger" role="alert">
+      {{ loadError }}
+    </div>
+
+    <template v-else-if="car">
 
       <div class="row g-4">
         <!-- Vehicle information -->
