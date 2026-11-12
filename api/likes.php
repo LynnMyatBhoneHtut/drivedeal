@@ -3,7 +3,7 @@
  * likes.php - Likes / votes
  *
  * Method Owner
- * GET    already live
+ * GET    Lynn (read-only, done)
  * POST   Yati
  * DELETE Yati
  *
@@ -12,13 +12,34 @@
  */
 
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/cars_common.php';
 
 switch (request_method()) {
   case 'GET':
-    // OWNER: already live
-    // Already live on Mercury - paste that code here first,
-    // otherwise deploying this file would replace the live one with this stub.
-    not_built_yet('likes.php GET');
+    // Read-only (Lynn).
+    //   ?listing_id=3&user_id=2 -> { "likes": 4, "liked": true }   (user_id optional)
+    //   ?user_id=2              -> { "cars": [...] }  every car this user liked, newest like first (Liked cars page)
+    $userId = int_param('user_id', 0);
+    $listingId = int_param('listing_id');
+
+    if ($listingId !== null) {
+      $count = db_select_one('SELECT COUNT(*) AS n FROM listing_likes WHERE listing_id = ?', 'i', array($listingId));
+      reply(array('likes' => (int) $count['n'], 'liked' => user_liked($userId, $listingId)));
+    }
+
+    if (!$userId) fail('Send listing_id, user_id, or both.');
+    $rows = db_select(
+      CAR_SELECT . ' JOIN listing_likes mine ON mine.listing_id = c.listing_id AND mine.user_id = ?
+                     ORDER BY mine.liked_at DESC, c.listing_id DESC',
+      'i', array($userId)
+    );
+    $cars = array();
+    foreach ($rows as $row) {
+      $car = car_row($row);
+      $car['liked'] = true;
+      $cars[] = $car;
+    }
+    reply(array('cars' => $cars));
 
   case 'POST':
     // OWNER: Yati

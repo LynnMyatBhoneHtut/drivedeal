@@ -76,3 +76,62 @@ function db() {
   }
   return $conn;
 }
+
+/** A whole-number query parameter (?page=2), or $default if missing / not a number. */
+function int_param($name, $default = null) {
+  if (!isset($_GET[$name]) || $_GET[$name] === '' || !is_numeric($_GET[$name])) return $default;
+  return (int) $_GET[$name];
+}
+
+/** A text query parameter (?make=Toyota), trimmed, or $default if missing. */
+function str_param($name, $default = '') {
+  if (!isset($_GET[$name]) || is_array($_GET[$name])) return $default;
+  return trim((string) $_GET[$name]);
+}
+
+/**
+ * Run a SELECT with ? placeholders and return all rows as arrays.
+ *   db_select('SELECT * FROM users WHERE user_id = ?', 'i', array($id))
+ * $types: one letter per value - i = whole number, d = decimal, s = text.
+ * Works with or without mysqlnd (older Mercury PHP has no get_result()).
+ */
+function db_select($sql, $types = '', $values = array()) {
+  $stmt = db()->prepare($sql);
+  if ($types !== '') {
+    $args = array($types);
+    foreach ($values as $i => $v) {
+      $args[] = &$values[$i]; // bind_param needs references
+    }
+    call_user_func_array(array($stmt, 'bind_param'), $args);
+  }
+  $stmt->execute();
+
+  $rows = array();
+  if (method_exists($stmt, 'get_result')) {
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) $rows[] = $row;
+  } else {
+    // Fallback without mysqlnd: bind every column to a variable
+    $meta = $stmt->result_metadata();
+    $row = array();
+    $refs = array();
+    while ($field = $meta->fetch_field()) {
+      $row[$field->name] = null;
+      $refs[] = &$row[$field->name];
+    }
+    call_user_func_array(array($stmt, 'bind_result'), $refs);
+    while ($stmt->fetch()) {
+      $copy = array();
+      foreach ($row as $k => $v) $copy[$k] = $v;
+      $rows[] = $copy;
+    }
+  }
+  $stmt->close();
+  return $rows;
+}
+
+/** First row of db_select(), or null. */
+function db_select_one($sql, $types = '', $values = array()) {
+  $rows = db_select($sql, $types, $values);
+  return count($rows) ? $rows[0] : null;
+}
