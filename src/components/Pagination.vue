@@ -1,19 +1,62 @@
 <script setup>
-// Page numbers under a list. OWNER: Lai. Other pages may reuse it, so keep these props as agreed.
-// Usage: <Pagination v-model:page="page" :total="total" :per-page="perPage" />
-// (total and perPage come straight from listings.php: { cars, total, page, perPage })
 import { computed } from 'vue'
 
-const page = defineModel('page', { type: Number, default: 1 })
-const props = defineProps({
-  total: { type: Number, required: true },
-  perPage: { type: Number, default: 6 }
+const page = defineModel('page', {
+  type: Number,
+  default: 1
 })
 
-const pageCount = computed(() => Math.max(1, Math.ceil(props.total / props.perPage)))
+const props = defineProps({
+  total: {
+    type: Number,
+    required: true
+  },
+  perPage: {
+    type: Number,
+    default: 6
+  }
+})
+
+const pageCount = computed(() =>
+  Math.ceil(props.total / props.perPage)
+)
+
+const pageNumbers = computed(() =>
+  Array.from(
+    { length: pageCount.value },
+    (_, index) => index + 1
+  )
+)
+
+function changePage(newPage) {
+  if (newPage >= 1 && newPage <= pageCount.value) {
+    page.value = newPage
+  }
+}
 </script>
 
 <template>
-  <!-- Placeholder - Lai builds the real Bootstrap pagination -->
-  <p class="text-muted">Pagination placeholder: page {{ page }} of {{ pageCount }}</p>
+  <nav v-if="pageCount > 1" aria-label="Car listing pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" :class="{ disabled: page === 1 }">
+        <button type="button" class="page-link" :disabled="page === 1" @click="changePage(page - 1)">
+          Previous
+        </button>
+      </li>
+
+      <li v-for="number in pageNumbers" :key="number" class="page-item" :class="{ active: page === number }">
+        <button
+type="button" class="page-link" :aria-label="`Go to page ${number}`"
+          :aria-current="page === number ? 'page' : undefined" @click="changePage(number)">
+          {{ number }}
+        </button>
+      </li>
+
+      <li class="page-item" :class="{ disabled: page === pageCount }">
+        <button type="button" class="page-link" :disabled="page === pageCount" @click="changePage(page + 1)">
+          Next
+        </button>
+      </li>
+    </ul>
+  </nav>
 </template>
