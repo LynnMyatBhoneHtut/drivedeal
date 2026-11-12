@@ -4,11 +4,10 @@
 import { isLoggedIn } from '../services/auth'
 
 export function authGuard(to) {
+  // Pages with meta.requiresAuth (Profile, Liked, Sell, Edit, My listings) need a logged-in user.
+  // Guests go to the login page, which sends them back here afterwards (?redirect=).
   if (to.meta.requiresAuth && !isLoggedIn()) {
-    // Not enforced yet, so nobody is blocked while building their pages.
-    // TODO (Yati): replace the line below with:
-    //   return { name: 'login', query: { redirect: to.fullPath } }
-    console.info(`[guard] ${to.path} needs login (not enforced yet)`)
+    return { name: 'login', query: { redirect: to.fullPath } }
   }
   return true
 }

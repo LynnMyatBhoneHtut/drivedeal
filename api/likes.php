@@ -44,13 +44,49 @@ switch (request_method()) {
   case 'POST':
     // OWNER: Yati
     // Like. Sends user_id, listing_id -> { likes: 4, liked: true }
-    not_built_yet('likes.php POST');
+    // Liking twice is harmless: the (user_id, listing_id) key keeps one row, INSERT IGNORE skips the copy.
+    $ids = like_ids();
+    $stmt = db()->prepare('INSERT IGNORE INTO listing_likes (user_id, listing_id) VALUES (?, ?)');
+    $stmt->bind_param('ii', $ids[0], $ids[1]);
+    $stmt->execute();
+    $stmt->close();
+    reply(like_state($ids[0], $ids[1]));
 
   case 'DELETE':
     // OWNER: Yati
     // Unlike. Sends user_id, listing_id -> { likes: 3, liked: false }
-    not_built_yet('likes.php DELETE');
+    $ids = like_ids();
+    $stmt = db()->prepare('DELETE FROM listing_likes WHERE user_id = ? AND listing_id = ?');
+    $stmt->bind_param('ii', $ids[0], $ids[1]);
+    $stmt->execute();
+    $stmt->close();
+    reply(like_state($ids[0], $ids[1]));
 
   default:
     fail('Method not allowed. Use GET, POST, DELETE.', 405);
+}
+
+// ---- Helpers for POST / DELETE. OWNER: Yati ----
+
+/** user_id and listing_id from the JSON body, after checking both exist. */
+function like_ids() {
+  $input = json_input();
+  $userId = isset($input['user_id']) && is_numeric($input['user_id']) ? (int) $input['user_id'] : 0;
+  $listingId = isset($input['listing_id']) && is_numeric($input['listing_id']) ? (int) $input['listing_id'] : 0;
+  if ($userId <= 0) fail('Please log in to like cars.', 401);
+  if ($listingId <= 0) fail('listing_id is required and must be a whole number.');
+
+  if (db_select_one('SELECT 1 AS yes FROM users WHERE user_id = ?', 'i', array($userId)) === null) {
+    fail('Your account was not found. Please log in again.', 401);
+  }
+  if (db_select_one('SELECT 1 AS yes FROM car_listings WHERE listing_id = ?', 'i', array($listingId)) === null) {
+    fail('Car not found.', 404);
+  }
+  return array($userId, $listingId);
+}
+
+/** { likes, liked } after the change, so the button shows the real count. */
+function like_state($userId, $listingId) {
+  $count = db_select_one('SELECT COUNT(*) AS n FROM listing_likes WHERE listing_id = ?', 'i', array($listingId));
+  return array('likes' => (int) $count['n'], 'liked' => user_liked($userId, $listingId));
 }
