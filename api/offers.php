@@ -1,7 +1,7 @@
 <?php
 /*
  * offers.php - Make-an-Offer & Negotiation System (Lynn's individual feature)
- * Rules: see offers_common.php. Tables: database/offers.sql.
+ * Rules: see offers_common.php. Tables: database/drivedeal.sql (Part 3).
  *
  * GET
  *   ?buyer_id=3                    -> { offers: [...] }  negotiations this buyer started (My offers)

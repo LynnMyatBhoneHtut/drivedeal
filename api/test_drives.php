@@ -1,7 +1,7 @@
 <?php
 /*
  * test_drives.php - Test Drive Request, part of the negotiation (Lynn's individual feature)
- * Rules: see offers_common.php. Table: database/offers.sql.
+ * Rules: see offers_common.php. Table: database/drivedeal.sql (Part 3).
  *
  * POST  { offer_id, buyer_id, preferred_date: 'YYYY-MM-DD', preferred_time: 'HH:MM', note? }
  *       -> { offer: {...} }   the negotiation, with its new test_drive
