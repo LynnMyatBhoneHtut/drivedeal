@@ -48,6 +48,23 @@ const { recommendations } = useCarRecommendations(
 
 
 const selectedCarIds = ref([])
+
+const comparisonSearch = ref('')
+
+// Filter comparison options while keeping selected cars visible
+const filteredComparisonCars = computed(() => {
+  const search = comparisonSearch.value.trim().toLowerCase()
+
+  return recommendations.value.filter(car => {
+    const carName = `${car.make} ${car.model}`.toLowerCase()
+    const isSelected = selectedCarIds.value.includes(
+      String(car.listing_id)
+    )
+
+    return carName.includes(search) || isSelected
+  })
+})
+
 const comparisonInitialized = ref(false)
 
 // Select the first three cars when data becomes available
@@ -158,8 +175,9 @@ function getScoreDetails(car) {
 </script>
 
 <template>
-  <section class="smart-match p-4 mb-4">
-    <div class="d-flex flex-wrap justify-content-between
+  <section class="smart-match p-3 p-md-4 mb-4">
+    <div
+class="d-flex flex-wrap justify-content-between
                 align-items-center gap-3 mb-4">
       <div>
         <p class="section-label mb-2">PERSONALISED SEARCH</p>
@@ -182,7 +200,8 @@ function getScoreDetails(car) {
           Maximum Budget
         </label>
 
-        <input id="matchBudget" v-model.number="preferences.budget" type="range" class="form-range" min="30000"
+        <input
+id="matchBudget" v-model.number="preferences.budget" type="range" class="form-range" min="30000"
           max="160000" step="5000" />
 
         <p class="fw-bold match-value mb-0">
@@ -195,7 +214,8 @@ function getScoreDetails(car) {
           Preferred Maximum Mileage
         </label>
 
-        <input id="matchMileage" v-model.number="preferences.maxMileage" type="range" class="form-range" min="10000"
+        <input
+id="matchMileage" v-model.number="preferences.maxMileage" type="range" class="form-range" min="10000"
           max="200000" step="5000" />
 
         <p class="fw-bold match-value mb-0">
@@ -236,7 +256,8 @@ function getScoreDetails(car) {
           </label>
 
 
-          <input :id="`weight-${field.key}`" v-model.number="preferences.weights[field.key]" type="range"
+          <input
+:id="`weight-${field.key}`" v-model.number="preferences.weights[field.key]" type="range"
             class="form-range" min="0" max="100" step="5" :disabled="field.key === 'make' && !preferences.preferredMake"
             :aria-describedby="field.key === 'make' ? 'brandWeightHint' : undefined" />
 
@@ -273,7 +294,8 @@ function getScoreDetails(car) {
       <div v-if="recommendations.length" class="row g-3">
         <div v-for="car in recommendations.slice(0, 3)" :key="car.listing_id" class="col-12 col-lg-4">
           <article class="recommendation-card h-100 p-3">
-            <div class="d-flex justify-content-between
+            <div
+class="d-flex justify-content-between
                         align-items-start gap-2 mb-2">
               <h4 class="h5 fw-bold mb-0">
                 {{ car.make }} {{ car.model }}
@@ -284,7 +306,8 @@ function getScoreDetails(car) {
               </span>
             </div>
 
-            <div class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car.matchScore"
+            <div
+class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car.matchScore"
               aria-valuemin="0" aria-valuemax="100" :aria-label="`Match score for ${car.make} ${car.model}`">
               <div class="progress-bar match-progress" :style="{ width: `${car.matchScore}%` }"></div>
             </div>
@@ -316,7 +339,8 @@ function getScoreDetails(car) {
                 of this car and the importance you assigned to each factor.
               </p>
 
-              <div v-for="factor in getScoreDetails(car)" :key="factor.key"
+              <div
+v-for="factor in getScoreDetails(car)" :key="factor.key"
                 class="d-flex justify-content-between gap-2 border-bottom py-2">
                 <div class="small">
                   <strong>{{ factor.label }}</strong>
@@ -340,7 +364,8 @@ function getScoreDetails(car) {
             </details>
 
 
-            <router-link :to="{
+            <router-link
+:to="{
               name: 'car-detail',
               params: { id: car.listing_id }
             }" class="btn btn-outline-dark w-100">
@@ -363,20 +388,47 @@ function getScoreDetails(car) {
         Choose Cars to Compare
       </h3>
 
-      <p class="text-muted small">
-        Select two or three cars to compare their suitability scores.
+
+      <p class="text-muted small mb-2" role="status">
+        {{ selectedCarIds.length }} of 3 cars selected.
+
+        <span v-if="selectedCarIds.length === 3">
+          Untick one selected car to choose a different car.
+        </span>
+
+        <span v-else>
+          Tick another car below to add it to your comparison.
+        </span>
       </p>
 
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <span v-for="car in comparisonCars" :key="car.listing_id" class="badge text-bg-light border text-dark">
+          {{ car.make }} {{ car.model }}
+        </span>
+      </div>
+
+
+      <div class="mb-3">
+        <label for="comparisonSearch" class="form-label fw-semibold">
+          Search Cars to Compare
+        </label>
+
+        <input
+id="comparisonSearch" v-model="comparisonSearch" type="search" class="form-control"
+          placeholder="Search by brand or model, e.g. Honda Civic" />
+      </div>
+
       <div class="d-flex flex-wrap gap-4">
-        <div v-for="car in recommendations" :key="car.listing_id" class="form-check">
-          <input :id="`compare-${car.listing_id}`" type="checkbox" class="form-check-input" :checked="selectedCarIds.includes(String(car.listing_id))
+        <div v-for="car in filteredComparisonCars" :key="car.listing_id" class="form-check">
+          <input
+:id="`compare-${car.listing_id}`" type="checkbox" class="form-check-input" :checked="selectedCarIds.includes(String(car.listing_id))
             " :disabled="(selectedCarIds.includes(String(car.listing_id)) &&
               selectedCarIds.length <= 2) ||
               (!selectedCarIds.includes(String(car.listing_id)) &&
                 selectedCarIds.length >= 3)
               " @change="
-                toggleCompare(car.listing_id, $event.target.checked)
-                " />
+              toggleCompare(car.listing_id, $event.target.checked)
+              " />
 
           <label :for="`compare-${car.listing_id}`" class="form-check-label">
             {{ car.make }} {{ car.model }}
@@ -387,7 +439,8 @@ function getScoreDetails(car) {
 
     <!-- Interactive comparison -->
 
-    <CarComparisonChart v-if="activeWeightTotal > 0" :cars="comparisonCars"
+    <CarComparisonChart
+v-if="activeWeightTotal > 0" :cars="comparisonCars"
       :show-brand="Boolean(preferences.preferredMake)" />
 
   </section>
