@@ -12,6 +12,7 @@ import RegisterView from '../views/RegisterView.vue'
 import LoginView from '../views/LoginView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import LikedCarsView from '../views/LikedCarsView.vue'
+import WatchlistView from '../views/WatchlistView.vue' // D/HD: price-drop watchlist
 // Lynn - Selling
 import SellCarView from '../views/SellCarView.vue'
 import EditListingView from '../views/EditListingView.vue'
@@ -33,6 +34,7 @@ const routes = [
   { path: '/login', name: 'login', component: LoginView },
   { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },
   { path: '/liked', name: 'liked', component: LikedCarsView, meta: { requiresAuth: true } },
+  { path: '/watchlist', name: 'watchlist', component: WatchlistView, meta: { requiresAuth: true } },
 
   // Lynn
   { path: '/sell', name: 'sell', component: SellCarView, meta: { requiresAuth: true } },
