@@ -10,6 +10,7 @@
 // The same rules are checked again in api/listings.php.
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { imageUrl } from '../services/api'
+import AppIcon from './AppIcon.vue'
 
 const props = defineProps({
   initialCar: { type: Object, default: null },
@@ -209,332 +210,639 @@ function submit() {
     newPhotos.value.map((photo) => photo.file)
   )
 }
+
+// ---- Progress line and drop zone (look only) ----
+const DETAIL_FIELDS = ['make', 'model', 'year', 'price', 'mileage_km', 'transmission', 'fuel_type']
+const detailsDone = computed(() => DETAIL_FIELDS.every((field) => !errors.value[field]))
+const photosDone = computed(() => totalPhotos.value > 0)
+const progressSteps = computed(() => [
+  { label: 'Details', done: detailsDone.value },
+  { label: 'Photos', done: photosDone.value },
+  { label: isEdit.value ? 'Save' : 'Publish', done: detailsDone.value && photosDone.value }
+])
+
+const dragging = ref(false)
+
+function dropPhotos(event) {
+  dragging.value = false
+  if (props.saving || totalPhotos.value >= MAX_PHOTOS) return
+  pickPhotos({ target: { files: event.dataTransfer ? event.dataTransfer.files : [], value: '' } })
+}
 </script>
 
 <template>
   <form class="car-form" novalidate @submit.prevent="submit">
-    <div class="row g-3">
-      <div class="col-12 col-md-6">
-        <label for="car-make" class="form-label">Make <span class="text-danger">*</span></label>
-        <input
-          id="car-make"
-          v-model="form.make"
-          type="text"
-          class="form-control"
-          :class="fieldClass('make')"
-          maxlength="50"
-          placeholder="e.g. Perodua"
-          required
-          @blur="touched.make = true"
-        />
-        <div class="invalid-feedback">{{ errors.make }}</div>
-      </div>
+    <!-- Progress line (purely visual) -->
+    <ol class="progress-line" aria-label="Listing progress">
+      <li v-for="(step, index) in progressSteps" :key="step.label" :class="{ done: step.done }">
+        <span class="progress-dot" aria-hidden="true">
+          <AppIcon v-if="step.done" name="check" :size="14" :stroke-width="2.5" />
+          <template v-else>{{ index + 1 }}</template>
+        </span>
+        <span class="progress-label">
+          {{ step.label }}
+          <span class="visually-hidden">{{ step.done ? '(complete)' : '(to do)' }}</span>
+        </span>
+      </li>
+    </ol>
 
-      <div class="col-12 col-md-6">
-        <label for="car-model" class="form-label">Model <span class="text-danger">*</span></label>
-        <input
-          id="car-model"
-          v-model="form.model"
-          type="text"
-          class="form-control"
-          :class="fieldClass('model')"
-          maxlength="50"
-          placeholder="e.g. Myvi"
-          required
-          @blur="touched.model = true"
-        />
-        <div class="invalid-feedback">{{ errors.model }}</div>
-      </div>
+    <!-- Car details -->
+    <fieldset class="form-card dd-card">
+      <legend class="form-card-title">
+        <span class="dd-icon-circle"><AppIcon name="car" /></span>
+        Car details
+      </legend>
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label for="car-make" class="form-label">Make <span class="text-danger">*</span></label>
+          <input
+            id="car-make"
+            v-model="form.make"
+            type="text"
+            class="form-control"
+            :class="fieldClass('make')"
+            maxlength="50"
+            placeholder="e.g. Perodua"
+            required
+            @blur="touched.make = true"
+          />
+          <div class="invalid-feedback">{{ errors.make }}</div>
+        </div>
 
-      <div class="col-6 col-md-4">
-        <label for="car-year" class="form-label">Year <span class="text-danger">*</span></label>
-        <input
-          id="car-year"
-          v-model="form.year"
-          type="number"
-          class="form-control"
-          :class="fieldClass('year')"
-          min="1980"
-          :max="MAX_YEAR"
-          step="1"
-          inputmode="numeric"
-          placeholder="e.g. 2021"
-          required
-          @blur="touched.year = true"
-        />
-        <div class="invalid-feedback">{{ errors.year }}</div>
-      </div>
+        <div class="col-12 col-md-6">
+          <label for="car-model" class="form-label">Model <span class="text-danger">*</span></label>
+          <input
+            id="car-model"
+            v-model="form.model"
+            type="text"
+            class="form-control"
+            :class="fieldClass('model')"
+            maxlength="50"
+            placeholder="e.g. Myvi"
+            required
+            @blur="touched.model = true"
+          />
+          <div class="invalid-feedback">{{ errors.model }}</div>
+        </div>
 
-      <div class="col-6 col-md-4">
-        <label for="car-price" class="form-label"
-          >Price (RM) <span class="text-danger">*</span></label
-        >
-        <input
-          id="car-price"
-          v-model="form.price"
-          type="number"
-          class="form-control"
-          :class="fieldClass('price')"
-          min="1"
-          max="10000000"
-          step="any"
-          inputmode="decimal"
-          placeholder="e.g. 48000"
-          required
-          @blur="touched.price = true"
-        />
-        <div class="invalid-feedback">{{ errors.price }}</div>
-        <div v-if="pricePreview && !showError('price')" class="form-text">{{ pricePreview }}</div>
-      </div>
+        <div class="col-6 col-md-3">
+          <label for="car-year" class="form-label">Year <span class="text-danger">*</span></label>
+          <input
+            id="car-year"
+            v-model="form.year"
+            type="number"
+            class="form-control"
+            :class="fieldClass('year')"
+            min="1980"
+            :max="MAX_YEAR"
+            step="1"
+            inputmode="numeric"
+            placeholder="e.g. 2021"
+            required
+            @blur="touched.year = true"
+          />
+          <div class="invalid-feedback">{{ errors.year }}</div>
+        </div>
 
-      <div class="col-12 col-md-4">
-        <label for="car-mileage" class="form-label">
-          Mileage (km) <span class="text-danger">*</span>
-        </label>
-        <input
-          id="car-mileage"
-          v-model="form.mileage_km"
-          type="number"
-          class="form-control"
-          :class="fieldClass('mileage_km')"
-          min="0"
-          max="2000000"
-          step="1"
-          inputmode="numeric"
-          placeholder="e.g. 35000"
-          required
-          @blur="touched.mileage_km = true"
-        />
-        <div class="invalid-feedback">{{ errors.mileage_km }}</div>
-      </div>
+        <div class="col-6 col-md-3">
+          <label for="car-body" class="form-label">Body type</label>
+          <select
+            id="car-body"
+            v-model="form.body_type"
+            class="form-select"
+            :class="fieldClass('body_type')"
+            @blur="touched.body_type = true"
+          >
+            <option value="">Not specified</option>
+            <option v-for="option in bodyTypeOptions" :key="option" :value="option">
+              {{ option }}
+            </option>
+          </select>
+          <div class="invalid-feedback">{{ errors.body_type }}</div>
+        </div>
 
-      <div class="col-6 col-md-4">
-        <label for="car-transmission" class="form-label">
-          Transmission <span class="text-danger">*</span>
-        </label>
-        <select
-          id="car-transmission"
-          v-model="form.transmission"
-          class="form-select"
-          :class="fieldClass('transmission')"
-          required
-          @blur="touched.transmission = true"
-        >
-          <option value="" disabled>Choose...</option>
-          <option v-for="option in TRANSMISSIONS" :key="option" :value="option">
-            {{ option }}
-          </option>
-        </select>
-        <div class="invalid-feedback">{{ errors.transmission }}</div>
-      </div>
+        <div class="col-6 col-md-3">
+          <label for="car-transmission" class="form-label">
+            Transmission <span class="text-danger">*</span>
+          </label>
+          <select
+            id="car-transmission"
+            v-model="form.transmission"
+            class="form-select"
+            :class="fieldClass('transmission')"
+            required
+            @blur="touched.transmission = true"
+          >
+            <option value="" disabled>Choose...</option>
+            <option v-for="option in TRANSMISSIONS" :key="option" :value="option">
+              {{ option }}
+            </option>
+          </select>
+          <div class="invalid-feedback">{{ errors.transmission }}</div>
+        </div>
 
-      <div class="col-6 col-md-4">
-        <label for="car-fuel" class="form-label"
-          >Fuel type <span class="text-danger">*</span></label
-        >
-        <select
-          id="car-fuel"
-          v-model="form.fuel_type"
-          class="form-select"
-          :class="fieldClass('fuel_type')"
-          required
-          @blur="touched.fuel_type = true"
-        >
-          <option value="" disabled>Choose...</option>
-          <option v-for="option in FUEL_TYPES" :key="option" :value="option">{{ option }}</option>
-        </select>
-        <div class="invalid-feedback">{{ errors.fuel_type }}</div>
-      </div>
-
-      <div class="col-12 col-md-4">
-        <label for="car-body" class="form-label">Body type</label>
-        <select
-          id="car-body"
-          v-model="form.body_type"
-          class="form-select"
-          :class="fieldClass('body_type')"
-          @blur="touched.body_type = true"
-        >
-          <option value="">Not specified</option>
-          <option v-for="option in bodyTypeOptions" :key="option" :value="option">
-            {{ option }}
-          </option>
-        </select>
-        <div class="invalid-feedback">{{ errors.body_type }}</div>
-      </div>
-
-      <div class="col-12 col-md-4">
-        <label for="car-colour" class="form-label">Colour</label>
-        <input
-          id="car-colour"
-          v-model="form.colour"
-          type="text"
-          class="form-control"
-          :class="fieldClass('colour')"
-          maxlength="30"
-          placeholder="e.g. Red"
-          @blur="touched.colour = true"
-        />
-        <div class="invalid-feedback">{{ errors.colour }}</div>
-      </div>
-
-      <div class="col-12" :class="isEdit ? 'col-md-4' : 'col-md-8'">
-        <label for="car-location" class="form-label">Location</label>
-        <input
-          id="car-location"
-          v-model="form.location"
-          type="text"
-          class="form-control"
-          :class="fieldClass('location')"
-          maxlength="100"
-          placeholder="e.g. Shah Alam, Selangor"
-          @blur="touched.location = true"
-        />
-        <div class="invalid-feedback">{{ errors.location }}</div>
-      </div>
-
-      <div v-if="isEdit" class="col-12 col-md-4">
-        <label for="car-status" class="form-label">Status <span class="text-danger">*</span></label>
-        <select
-          id="car-status"
-          v-model="form.status"
-          class="form-select"
-          :class="fieldClass('status')"
-          @blur="touched.status = true"
-        >
-          <option value="available">Available</option>
-          <option value="reserved">Reserved</option>
-          <option value="sold">Sold</option>
-        </select>
-        <div class="invalid-feedback">{{ errors.status }}</div>
-      </div>
-
-      <div class="col-12">
-        <label for="car-description" class="form-label">Description</label>
-        <textarea
-          id="car-description"
-          v-model="form.description"
-          class="form-control"
-          :class="fieldClass('description')"
-          rows="5"
-          placeholder="Condition, service history, extras..."
-          @blur="touched.description = true"
-        ></textarea>
-        <div class="invalid-feedback">{{ errors.description }}</div>
-        <div
-          class="form-text text-end"
-          :class="{ 'text-danger': text(form.description).length > 2000 }"
-        >
-          {{ text(form.description).length }} / 2000
+        <div class="col-6 col-md-3">
+          <label for="car-fuel" class="form-label">
+            Fuel type <span class="text-danger">*</span>
+          </label>
+          <select
+            id="car-fuel"
+            v-model="form.fuel_type"
+            class="form-select"
+            :class="fieldClass('fuel_type')"
+            required
+            @blur="touched.fuel_type = true"
+          >
+            <option value="" disabled>Choose...</option>
+            <option v-for="option in FUEL_TYPES" :key="option" :value="option">
+              {{ option }}
+            </option>
+          </select>
+          <div class="invalid-feedback">{{ errors.fuel_type }}</div>
         </div>
       </div>
+    </fieldset>
 
-      <!-- Photos -->
-      <div class="col-12">
-        <label for="car-photos" class="form-label">
-          Photos
-          <span class="text-muted small">({{ totalPhotos }} / {{ MAX_PHOTOS }})</span>
-        </label>
-
-        <div v-if="existingImages.length" class="mb-3">
-          <p class="small text-muted mb-2">Current photos (the first one is the cover photo)</p>
-          <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-4 g-2">
-            <div v-for="(image, index) in existingImages" :key="image.image_id" class="col">
-              <div class="card h-100">
-                <img
-                  :src="imageUrl(image.image_path)"
-                  class="card-img-top photo-thumb"
-                  :alt="`Photo ${index + 1}`"
-                />
-                <div class="card-body p-2 d-flex justify-content-between align-items-center">
-                  <span v-if="index === 0" class="badge bg-primary">Cover</span>
-                  <span v-else></span>
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    :disabled="saving"
-                    @click="emit('remove-image', image)"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            </div>
+    <!-- Price & condition -->
+    <fieldset class="form-card dd-card">
+      <legend class="form-card-title">
+        <span class="dd-icon-circle"><AppIcon name="tag" /></span>
+        Price &amp; condition
+      </legend>
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <label for="car-price" class="form-label">
+            Price (RM) <span class="text-danger">*</span>
+          </label>
+          <input
+            id="car-price"
+            v-model="form.price"
+            type="number"
+            class="form-control"
+            :class="fieldClass('price')"
+            min="1"
+            max="10000000"
+            step="any"
+            inputmode="decimal"
+            placeholder="e.g. 48000"
+            required
+            @blur="touched.price = true"
+          />
+          <div class="invalid-feedback">{{ errors.price }}</div>
+          <div v-if="pricePreview && !showError('price')" class="form-text price-preview">
+            {{ pricePreview }}
           </div>
         </div>
 
+        <div class="col-12 col-md-4">
+          <label for="car-mileage" class="form-label">
+            Mileage (km) <span class="text-danger">*</span>
+          </label>
+          <input
+            id="car-mileage"
+            v-model="form.mileage_km"
+            type="number"
+            class="form-control"
+            :class="fieldClass('mileage_km')"
+            min="0"
+            max="2000000"
+            step="1"
+            inputmode="numeric"
+            placeholder="e.g. 35000"
+            required
+            @blur="touched.mileage_km = true"
+          />
+          <div class="invalid-feedback">{{ errors.mileage_km }}</div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label for="car-colour" class="form-label">Colour</label>
+          <input
+            id="car-colour"
+            v-model="form.colour"
+            type="text"
+            class="form-control"
+            :class="fieldClass('colour')"
+            maxlength="30"
+            placeholder="e.g. Red"
+            @blur="touched.colour = true"
+          />
+          <div class="invalid-feedback">{{ errors.colour }}</div>
+        </div>
+
+        <div v-if="isEdit" class="col-12 col-md-4">
+          <label for="car-status" class="form-label">
+            Status <span class="text-danger">*</span>
+          </label>
+          <select
+            id="car-status"
+            v-model="form.status"
+            class="form-select"
+            :class="fieldClass('status')"
+            @blur="touched.status = true"
+          >
+            <option value="available">Available</option>
+            <option value="reserved">Reserved</option>
+            <option value="sold">Sold</option>
+          </select>
+          <div class="invalid-feedback">{{ errors.status }}</div>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Location & description -->
+    <fieldset class="form-card dd-card">
+      <legend class="form-card-title">
+        <span class="dd-icon-circle"><AppIcon name="pin" /></span>
+        Location &amp; description
+      </legend>
+      <div class="row g-3">
+        <div class="col-12">
+          <label for="car-location" class="form-label">Location</label>
+          <input
+            id="car-location"
+            v-model="form.location"
+            type="text"
+            class="form-control"
+            :class="fieldClass('location')"
+            maxlength="100"
+            placeholder="e.g. Shah Alam, Selangor"
+            @blur="touched.location = true"
+          />
+          <div class="invalid-feedback">{{ errors.location }}</div>
+        </div>
+
+        <div class="col-12">
+          <label for="car-description" class="form-label">Description</label>
+          <textarea
+            id="car-description"
+            v-model="form.description"
+            class="form-control"
+            :class="fieldClass('description')"
+            rows="5"
+            placeholder="Condition, service history, extras..."
+            @blur="touched.description = true"
+          ></textarea>
+          <div class="invalid-feedback">{{ errors.description }}</div>
+          <div
+            class="form-text text-end"
+            :class="{ 'text-danger': text(form.description).length > 2000 }"
+          >
+            {{ text(form.description).length }} / 2000
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Photos -->
+    <fieldset class="form-card dd-card">
+      <legend class="form-card-title">
+        <span class="dd-icon-circle"><AppIcon name="image" /></span>
+        Photos
+        <span class="photo-count">{{ totalPhotos }} / {{ MAX_PHOTOS }}</span>
+      </legend>
+
+      <label
+        for="car-photos"
+        class="drop-zone"
+        :class="{ dragging, disabled: saving || totalPhotos >= MAX_PHOTOS }"
+        @dragenter.prevent="dragging = true"
+        @dragover.prevent="dragging = true"
+        @dragleave.prevent="dragging = false"
+        @drop.prevent="dropPhotos"
+      >
+        <span class="drop-icon"><AppIcon name="upload" :size="26" /></span>
+        <span class="drop-title">
+          <template v-if="totalPhotos >= MAX_PHOTOS">You've added the maximum of 8 photos</template>
+          <template v-else>Drag photos here or <span class="text-primary">browse</span></template>
+        </span>
+        <span class="drop-hint">
+          JPG, PNG or WEBP, up to 2 MB each, {{ MAX_PHOTOS }} photos per car. The first photo is the
+          cover.
+        </span>
         <input
           id="car-photos"
           type="file"
-          class="form-control"
+          class="visually-hidden"
           accept="image/jpeg,image/png,image/webp"
           multiple
           :disabled="saving || totalPhotos >= MAX_PHOTOS"
           @change="pickPhotos"
         />
-        <div class="form-text">
-          JPG, PNG or WEBP, up to 2 MB each, {{ MAX_PHOTOS }} photos per car.
-        </div>
+      </label>
 
-        <div v-if="photoErrors.length" class="alert alert-warning mt-2 mb-0 py-2" role="alert">
-          <div v-for="message in photoErrors" :key="message" class="small">{{ message }}</div>
-        </div>
-
-        <div v-if="newPhotos.length" class="mt-3">
-          <p class="small text-muted mb-2">New photos (uploaded when you save)</p>
-          <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-4 g-2">
-            <div v-for="(photo, index) in newPhotos" :key="photo.key" class="col">
-              <div class="card h-100">
-                <img :src="photo.url" class="card-img-top photo-thumb" :alt="photo.file.name" />
-                <div class="card-body p-2 d-flex justify-content-between align-items-center gap-2">
-                  <span class="small text-truncate" :title="photo.file.name">
-                    <span v-if="!existingImages.length && index === 0" class="badge bg-primary">
-                      Cover
-                    </span>
-                    <template v-else>{{ photo.file.name }}</template>
-                  </span>
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-secondary flex-shrink-0"
-                    :disabled="saving"
-                    :aria-label="`Remove ${photo.file.name}`"
-                    @click="removeNewPhoto(index)"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div v-if="photoErrors.length" class="alert alert-warning mt-3 mb-0 py-2" role="alert">
+        <div v-for="message in photoErrors" :key="message" class="small">{{ message }}</div>
       </div>
 
-      <div class="col-12">
-        <div
-          v-if="submitted && Object.keys(errors).length"
-          class="alert alert-danger py-2"
-          role="alert"
-        >
-          Please fix the highlighted fields.
+      <div v-if="existingImages.length || newPhotos.length" class="photo-grid mt-3">
+        <div v-for="(image, index) in existingImages" :key="image.image_id" class="photo-tile">
+          <img :src="imageUrl(image.image_path)" class="photo-thumb" :alt="`Photo ${index + 1}`" />
+          <span v-if="index === 0" class="photo-badge">Cover</span>
+          <button
+            type="button"
+            class="photo-remove"
+            :disabled="saving"
+            :aria-label="`Remove photo ${index + 1}`"
+            title="Remove photo"
+            @click="emit('remove-image', image)"
+          >
+            <AppIcon name="trash" :size="16" />
+          </button>
         </div>
-        <button type="submit" class="btn btn-primary btn-lg w-100 w-sm-auto" :disabled="saving">
-          <span
-            v-if="saving"
-            class="spinner-border spinner-border-sm me-2"
-            role="status"
-            aria-hidden="true"
-          ></span>
-          {{ saving ? 'Saving...' : isEdit ? 'Save changes' : 'List my car' }}
-        </button>
+
+        <div v-for="(photo, index) in newPhotos" :key="photo.key" class="photo-tile is-new">
+          <img :src="photo.url" class="photo-thumb" :alt="photo.file.name" />
+          <span v-if="!existingImages.length && index === 0" class="photo-badge">Cover</span>
+          <span v-else class="photo-badge photo-badge-new">New</span>
+          <button
+            type="button"
+            class="photo-remove"
+            :disabled="saving"
+            :aria-label="`Remove ${photo.file.name}`"
+            title="Remove photo"
+            @click="removeNewPhoto(index)"
+          >
+            <AppIcon name="x" :size="16" />
+          </button>
+        </div>
       </div>
+      <p v-if="newPhotos.length" class="small text-muted mt-2 mb-0">
+        New photos are uploaded when you save.
+      </p>
+    </fieldset>
+
+    <div class="form-actions">
+      <div
+        v-if="submitted && Object.keys(errors).length"
+        class="alert alert-danger py-2"
+        role="alert"
+      >
+        Please fix the highlighted fields.
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg w-100 w-sm-auto" :disabled="saving">
+        <span
+          v-if="saving"
+          class="spinner-border spinner-border-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        <AppIcon v-else :name="isEdit ? 'check' : 'upload'" :size="20" />
+        {{ saving ? 'Saving...' : isEdit ? 'Save changes' : 'List my car' }}
+      </button>
     </div>
   </form>
 </template>
 
 <style scoped>
+/* Progress line */
+.progress-line {
+  display: flex;
+  align-items: center;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-line li {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--dd-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.progress-line li:last-child {
+  flex: 0 0 auto;
+}
+
+.progress-line li:not(:last-child)::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  margin: 0 0.5rem;
+  border-radius: 2px;
+  background: var(--dd-line);
+}
+
+.progress-line li.done {
+  color: var(--dd-primary);
+}
+
+.progress-line li.done:not(:last-child)::after {
+  background: var(--dd-primary);
+}
+
+.progress-dot {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--dd-line);
+  border-radius: 50%;
+  background: var(--dd-white);
+  font-size: 0.8rem;
+}
+
+.progress-line li.done .progress-dot {
+  border-color: var(--dd-primary);
+  background: var(--dd-primary);
+  color: var(--dd-white);
+}
+
+/* Section cards */
+.form-card {
+  min-width: 0;
+  margin: 0 0 1.25rem;
+  padding: 1.5rem;
+}
+
+.form-card-title {
+  float: left;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin-bottom: 1.25rem;
+  padding: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--dd-ink);
+}
+
+.form-card-title + * {
+  clear: left;
+}
+
+.form-card-title .dd-icon-circle {
+  width: 40px;
+  height: 40px;
+}
+
+.photo-count {
+  margin-left: auto;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--dd-radius-pill);
+  background: var(--dd-primary-50);
+  color: var(--dd-primary-700);
+  font-size: 0.8rem;
+}
+
+.price-preview {
+  color: var(--dd-primary);
+  font-weight: 700;
+}
+
+/* Drop zone */
+.drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 2rem 1rem;
+  border: 2px dashed var(--dd-primary-100);
+  border-radius: var(--dd-radius);
+  background: var(--dd-surface);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.drop-zone:hover,
+.drop-zone.dragging {
+  border-color: var(--dd-primary);
+  background: var(--dd-primary-50);
+}
+
+.drop-zone:focus-within {
+  outline: 3px solid var(--dd-primary-100);
+  outline-offset: 2px;
+  border-color: var(--dd-primary);
+}
+
+.drop-zone.disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.drop-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 0.25rem;
+  border-radius: 50%;
+  background: var(--dd-white);
+  color: var(--dd-primary);
+  box-shadow: var(--dd-shadow-sm);
+}
+
+.drop-title {
+  font-weight: 700;
+  color: var(--dd-ink);
+}
+
+.drop-hint {
+  max-width: 420px;
+  font-size: 0.85rem;
+  color: var(--dd-muted);
+}
+
+/* Photo previews */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (min-width: 576px) {
+  .photo-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 992px) {
+  .photo-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.photo-tile {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--dd-line);
+  border-radius: var(--dd-radius-sm);
+  background: var(--dd-surface);
+}
+
+.photo-tile.is-new {
+  border-color: var(--dd-primary-100);
+}
+
 .photo-thumb {
+  display: block;
+  width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
+}
+
+.photo-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--dd-radius-pill);
+  background: var(--dd-primary);
+  color: var(--dd-white);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.photo-badge-new {
+  background: var(--dd-white);
+  color: var(--dd-primary-700);
+}
+
+.photo-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--dd-white);
+  color: var(--dd-danger);
+  box-shadow: var(--dd-shadow);
+}
+
+.photo-remove:hover:not(:disabled) {
+  background: var(--dd-danger);
+  color: var(--dd-white);
+}
+
+.form-actions {
+  padding-top: 0.25rem;
+}
+
+@media (max-width: 575.98px) {
+  .form-card {
+    padding: 1.15rem;
+  }
+
+  .progress-label {
+    font-size: 0.8rem;
+  }
 }
 
 @media (min-width: 576px) {

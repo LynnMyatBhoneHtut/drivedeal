@@ -59,12 +59,21 @@ async function load() {
   }
 }
 
+// Colours come from the design tokens in main.css (--dd-chart-1 etc.), never hard-coded
+function token(name, fallback) {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  return value || fallback
+}
+
 function draw() {
   if (chart) chart.destroy()
   chart = null
   if (!canvas.value || !history.value || !history.value.changes) return
   const points = history.value.points
   const lastIndex = points.length - 1
+  const line = token('--dd-chart-1', 'blue')
+  const fillColour = token('--dd-primary-50', 'transparent')
+  const nowColour = token('--dd-success', 'green')
   chart = new Chart(canvas.value, {
     type: 'line',
     data: {
@@ -74,11 +83,11 @@ function draw() {
           label: 'Price',
           data: points.map((p) => p.price),
           stepped: 'before',
-          borderColor: '#0d6efd',
-          backgroundColor: 'rgba(13, 110, 253, 0.08)',
+          borderColor: line,
+          backgroundColor: fillColour,
           fill: true,
           pointRadius: 4,
-          pointBackgroundColor: points.map((p, i) => (i === lastIndex ? '#198754' : '#0d6efd'))
+          pointBackgroundColor: points.map((p, i) => (i === lastIndex ? nowColour : line))
         }
       ]
     },
@@ -112,8 +121,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="details-card price-history">
-    <h2 class="h5 fw-bold mb-1">Price history</h2>
+  <div class="price-history">
+    <h2 class="h3 mb-2">Price history</h2>
 
     <p v-if="loading && !history" class="text-muted small mb-0">Loading price history...</p>
     <p v-else-if="errorMessage" class="text-muted small mb-0">{{ errorMessage }}</p>

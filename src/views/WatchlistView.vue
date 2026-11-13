@@ -7,6 +7,7 @@ import { useWatchlistStore } from '../stores/watchlist'
 import { imageUrl } from '../services/api'
 import { formatRM, targetPriceError, targetProgress, timeAgo } from '../services/priceChange'
 import Pagination from '../components/Pagination.vue'
+import AppIcon from '../components/AppIcon.vue'
 
 const PER_PAGE = 6
 
@@ -129,7 +130,7 @@ function statusBadge(status) {
       <div>
         <h1 class="mb-1">My watchlist</h1>
         <p class="text-muted mb-0">
-          We'll alert you (&#128276; in the menu bar) when any of these cars gets cheaper.
+          We'll alert you with the bell in the menu bar when any of these cars gets cheaper.
         </p>
       </div>
       <router-link :to="{ name: 'cars' }" class="btn btn-outline-primary"
@@ -155,7 +156,7 @@ function statusBadge(status) {
     </div>
 
     <div v-else-if="!watchlist.count" class="text-center border rounded p-5 bg-light">
-      <p class="display-6 mb-2" aria-hidden="true">&#128276;</p>
+      <span class="dd-icon-circle mx-auto mb-3"><AppIcon name="eye" :size="24" /></span>
       <p class="lead mb-2">You aren't watching any cars yet.</p>
       <p class="text-muted">
         Open a car and press <strong>Watch price</strong>. You can set a target price too.
@@ -236,7 +237,7 @@ function statusBadge(status) {
         class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4"
       >
         <div v-for="car in pagedCars" :key="car.listing_id" class="col">
-          <article class="card h-100 shadow-sm" :class="{ 'border-success': car.targetReached }">
+          <article class="card dd-card h-100" :class="{ 'border-success': car.targetReached }">
             <div class="position-relative">
               <img
                 v-if="car.image_path"

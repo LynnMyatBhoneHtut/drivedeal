@@ -39,12 +39,15 @@ let chartInstance = null
 const selectedCars = computed(() => props.cars.slice(0, 3))
 
 // Compare normalised scores using the same 0-100 scale
+
 const criteria = computed(() => {
   const items = [
+    { key: 'overall', label: 'Overall Match' },
     { key: 'price', label: 'Price' },
     { key: 'mileage', label: 'Mileage' },
     { key: 'age', label: 'Vehicle Age' }
   ]
+
 
   if (props.showBrand) {
     items.push({ key: 'make', label: 'Brand Match' })
@@ -59,13 +62,17 @@ const chartColors = [
   '#0f766e'
 ]
 
+
 function getScore(car, key) {
-  const value = Number(car.scoreBreakdown?.[key])
+  const value = key === 'overall'
+    ? Number(car.matchScore)
+    : Number(car.scoreBreakdown?.[key])
 
   return Number.isFinite(value)
     ? Math.max(0, Math.min(100, value))
     : 0
 }
+
 
 function getChartData() {
   return {
@@ -150,62 +157,72 @@ onBeforeUnmount(() => {
       Interactive Car Comparison
     </h3>
 
+
     <p class="text-muted mb-4">
-      Compare how the recommended cars perform across
-      different criteria. The chart updates when you
-      adjust your preferences.
+      Compare up to three cars based on your preferences.
+      Higher scores mean a better match.
+      Overall Match combines your selected factors and their
+      importance weights. The chart updates automatically
+      when your preferences change.
     </p>
+
 
     <div v-if="!selectedCars.length" class="alert alert-info">
       No cars are available for comparison.
     </div>
 
-    <template v-else>
+
+    <p class="d-md-none small text-muted mb-2">
+      Swipe left or right on the chart to see all comparison scores.
+    </p>
+
+    <div class="chart-scroll" role="region" aria-label="Scrollable car comparison chart" tabindex="0">
       <div class="chart-container">
         <canvas ref="chartCanvas" role="img" aria-label="Bar chart comparing vehicle suitability scores"></canvas>
       </div>
+    </div>
 
-      <!-- Accessible alternative to the chart -->
-      <details class="mt-3">
-        <summary class="fw-semibold">
-          View comparison scores as a table
-        </summary>
+    <!-- Accessible alternative to the chart -->
+    <details class="mt-3">
+      <summary class="fw-semibold">
+        View comparison scores as a table
+      </summary>
 
-        <div class="table-responsive mt-3">
-          <table class="table table-bordered table-sm">
-            <caption>
-              Car suitability scores out of 100
-            </caption>
+      <div class="table-responsive mt-3">
+        <table class="table table-bordered table-sm">
+          <caption>
+            Car suitability scores out of 100
+          </caption>
 
-            <thead>
-              <tr>
-                <th scope="col">Criterion</th>
-                <th v-for="car in selectedCars" :key="car.listing_id" scope="col">
-                  {{ car.make }} {{ car.model }}
-                </th>
-              </tr>
-            </thead>
+          <thead>
+            <tr>
+              <th scope="col">Criterion</th>
+              <th v-for="car in selectedCars" :key="car.listing_id" scope="col">
+                {{ car.make }} {{ car.model }}
+              </th>
+            </tr>
+          </thead>
 
-            <tbody>
-              <tr v-for="item in criteria" :key="item.key">
-                <th scope="row">{{ item.label }}</th>
-                <td v-for="car in selectedCars" :key="car.listing_id">
-                  {{ Math.round(getScore(car, item.key)) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </details>
-    </template>
+          <tbody>
+            <tr v-for="item in criteria" :key="item.key">
+              <th scope="row">{{ item.label }}</th>
+              <td v-for="car in selectedCars" :key="car.listing_id">
+                {{ Math.round(getScore(car, item.key)) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
   </section>
 </template>
 
 <style scoped>
-.comparison-section {
-  background: white;
-  border: 1px solid #e9e5e1;
-  border-radius: 14px;
+.chart-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .chart-container {
@@ -214,18 +231,19 @@ onBeforeUnmount(() => {
   height: 350px;
 }
 
-summary {
-  cursor: pointer;
-  color: #9a3412;
+.chart-scroll:focus-visible {
+  outline: 2px solid #c2410c;
+  outline-offset: 2px;
 }
 
 @media (max-width: 767px) {
   .comparison-section {
-    padding: 18px !important;
+    padding: 12px !important;
   }
 
   .chart-container {
-    height: 300px;
+    min-width: 600px;
+    height: 320px;
   }
 }
 </style>

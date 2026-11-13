@@ -48,6 +48,23 @@ const { recommendations } = useCarRecommendations(
 
 
 const selectedCarIds = ref([])
+
+const comparisonSearch = ref('')
+
+// Filter comparison options while keeping selected cars visible
+const filteredComparisonCars = computed(() => {
+  const search = comparisonSearch.value.trim().toLowerCase()
+
+  return recommendations.value.filter(car => {
+    const carName = `${car.make} ${car.model}`.toLowerCase()
+    const isSelected = selectedCarIds.value.includes(
+      String(car.listing_id)
+    )
+
+    return carName.includes(search) || isSelected
+  })
+})
+
 const comparisonInitialized = ref(false)
 
 // Select the first three cars when data becomes available
@@ -119,10 +136,46 @@ const activeWeightTotal = computed(() => {
   )
 })
 
+// Fields used to explain the weighted recommendation score
+const scoreCriteria = [
+  { key: 'price', label: 'Price' },
+  { key: 'mileage', label: 'Mileage' },
+  { key: 'age', label: 'Vehicle Age' },
+  { key: 'make', label: 'Brand Preference' }
+]
+
+// Show only criteria which contribute to the current match score
+function getScoreDetails(car) {
+  const total = activeWeightTotal.value
+
+  if (total <= 0) return []
+
+  return scoreCriteria
+    .filter(field => {
+      const isActive = Number(preferences.value.weights[field.key]) > 0
+      const isRelevant = field.key !== 'make' ||
+        Boolean(preferences.value.preferredMake)
+
+      return isActive && isRelevant
+    })
+    .map(field => {
+      const weight = Number(preferences.value.weights[field.key])
+      const score = Number(car.scoreBreakdown?.[field.key] ?? 0)
+
+      return {
+        key: field.key,
+        label: field.label,
+        score: score.toFixed(1),
+        weight: ((weight / total) * 100).toFixed(1),
+        contribution: ((score * weight) / total).toFixed(1)
+      }
+    })
+}
+
 </script>
 
 <template>
-  <section class="smart-match p-4 mb-4">
+  <section class="smart-match p-3 p-md-4 mb-4">
     <div
 class="d-flex flex-wrap justify-content-between
                 align-items-center gap-3 mb-4">
@@ -202,9 +255,20 @@ id="matchMileage" v-model.number="preferences.maxMileage" type="range" class="fo
             <span>{{ preferences.weights[field.key] }}</span>
           </label>
 
+
           <input
 :id="`weight-${field.key}`" v-model.number="preferences.weights[field.key]" type="range"
-            class="form-range" min="0" max="100" step="5" />
+            class="form-range" min="0" max="100" step="5" :disabled="field.key === 'make' && !preferences.preferredMake"
+            :aria-describedby="field.key === 'make' ? 'brandWeightHint' : undefined" />
+
+          <p v-if="field.key === 'make'" id="brandWeightHint" class="small text-muted mt-1 mb-0">
+            {{
+              preferences.preferredMake
+                ? 'Adjust how important your preferred brand is.'
+                : 'Choose a Preferred Brand above to enable this slider.'
+            }}
+          </p>
+
         </div>
       </div>
     </div>
@@ -263,6 +327,43 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
               </li>
             </ul>
 
+
+            <!-- Explain each recommendation score -->
+            <details class="border rounded p-3 mb-3">
+              <summary class="fw-semibold">
+                Why this score?
+              </summary>
+
+              <p class="small text-muted mt-3 mb-2">
+                Your match score is calculated using the suitability
+                of this car and the importance you assigned to each factor.
+              </p>
+
+              <div
+v-for="factor in getScoreDetails(car)" :key="factor.key"
+                class="d-flex justify-content-between gap-2 border-bottom py-2">
+                <div class="small">
+                  <strong>{{ factor.label }}</strong>
+                  <div class="text-muted">
+                    {{ factor.score }}/100 × {{ factor.weight }}% importance
+                  </div>
+                </div>
+
+                <strong class="small text-nowrap">
+                  {{ factor.contribution }} pts
+                </strong>
+              </div>
+
+              <p class="small fw-semibold mt-3 mb-0">
+                Final match score: {{ car.matchScore }}/100
+              </p>
+
+              <p class="small text-muted mb-0">
+                Individual contributions are shown rounded to one decimal place.
+              </p>
+            </details>
+
+
             <router-link
 :to="{
               name: 'car-detail',
@@ -287,12 +388,38 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
         Choose Cars to Compare
       </h3>
 
-      <p class="text-muted small">
-        Select two or three cars to compare their suitability scores.
+
+      <p class="text-muted small mb-2" role="status">
+        {{ selectedCarIds.length }} of 3 cars selected.
+
+        <span v-if="selectedCarIds.length === 3">
+          Untick one selected car to choose a different car.
+        </span>
+
+        <span v-else>
+          Tick another car below to add it to your comparison.
+        </span>
       </p>
 
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <span v-for="car in comparisonCars" :key="car.listing_id" class="badge text-bg-light border text-dark">
+          {{ car.make }} {{ car.model }}
+        </span>
+      </div>
+
+
+      <div class="mb-3">
+        <label for="comparisonSearch" class="form-label fw-semibold">
+          Search Cars to Compare
+        </label>
+
+        <input
+id="comparisonSearch" v-model="comparisonSearch" type="search" class="form-control"
+          placeholder="Search by brand or model, e.g. Honda Civic" />
+      </div>
+
       <div class="d-flex flex-wrap gap-4">
-        <div v-for="car in recommendations" :key="car.listing_id" class="form-check">
+        <div v-for="car in filteredComparisonCars" :key="car.listing_id" class="form-check">
           <input
 :id="`compare-${car.listing_id}`" type="checkbox" class="form-check-input" :checked="selectedCarIds.includes(String(car.listing_id))
             " :disabled="(selectedCarIds.includes(String(car.listing_id)) &&
@@ -300,8 +427,8 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
               (!selectedCarIds.includes(String(car.listing_id)) &&
                 selectedCarIds.length >= 3)
               " @change="
-                toggleCompare(car.listing_id, $event.target.checked)
-                " />
+              toggleCompare(car.listing_id, $event.target.checked)
+              " />
 
           <label :for="`compare-${car.listing_id}`" class="form-check-label">
             {{ car.make }} {{ car.model }}
@@ -315,7 +442,6 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
     <CarComparisonChart
 v-if="activeWeightTotal > 0" :cars="comparisonCars"
       :show-brand="Boolean(preferences.preferredMake)" />
-
 
   </section>
 </template>

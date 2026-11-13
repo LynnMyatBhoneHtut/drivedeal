@@ -70,22 +70,32 @@ function alertIcon(alert) {
   <div class="dropdown notification-bell">
     <button
       type="button"
-      class="btn btn-link nav-link position-relative px-2"
+      class="bell-btn position-relative"
       data-bs-toggle="dropdown"
       data-bs-auto-close="outside"
       aria-expanded="false"
       :aria-label="bellLabel"
       :title="bellLabel"
     >
-      <span class="bell-icon" :class="{ ring: watchlist.unread }" aria-hidden="true"
-        >&#128276;</span
+      <!-- Line-style bell drawn to match AppIcon (which has no bell) -->
+      <svg
+        class="bell-icon"
+        :class="{ ring: watchlist.unread }"
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
       >
+        <path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z" />
+        <path d="M10 20.5a2 2 0 0 0 4 0" />
+      </svg>
       <Transition name="pop">
-        <span
-          v-if="watchlist.unread"
-          :key="badgeText"
-          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-        >
+        <span v-if="watchlist.unread" :key="badgeText" class="bell-badge">
           {{ badgeText }}
         </span>
       </Transition>
@@ -177,10 +187,36 @@ function alertIcon(alert) {
 </template>
 
 <style scoped>
-.bell-icon {
-  display: inline-block;
-  font-size: 1.15rem;
-  line-height: 1;
+.bell-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dd-ink);
+}
+.bell-btn:hover,
+.bell-btn[aria-expanded='true'] {
+  color: var(--dd-primary);
+  background: var(--dd-primary-50);
+}
+.bell-badge {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--dd-danger);
+  color: var(--dd-white);
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
 }
 .bell-icon.ring {
   animation: ring 1.2s ease-in-out 1;
@@ -221,14 +257,14 @@ function alertIcon(alert) {
   font-size: 0.75rem;
 }
 .dropdown-item.unread {
-  background-color: rgba(13, 110, 253, 0.07);
+  background-color: var(--dd-primary-50);
 }
 .unread-dot {
   width: 8px;
   height: 8px;
   margin-top: 6px;
   border-radius: 50%;
-  background: var(--bs-primary);
+  background: var(--dd-primary);
 }
 
 /* Badge pops when the count changes */
@@ -236,7 +272,7 @@ function alertIcon(alert) {
   transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.6, 1);
 }
 .pop-enter-from {
-  transform: translate(-50%, -50%) scale(0);
+  transform: scale(0);
 }
 
 /* New alerts slide into the list */

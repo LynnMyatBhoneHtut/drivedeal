@@ -8,6 +8,7 @@
 // - Uses the Pinia store, so the bell and the My watchlist page update at the same time.
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import AppIcon from './AppIcon.vue'
 import { useWatchlistStore } from '../stores/watchlist'
 import { currentUser } from '../services/auth'
 import { formatRM, priceChange, targetPriceError } from '../services/priceChange'
@@ -96,14 +97,14 @@ async function stopWatching() {
       class="btn btn-outline-primary w-100"
       @click="openForm"
     >
-      <span aria-hidden="true">&#128276;</span> Watch price
+      <AppIcon name="eye" :size="18" /> Watch price
     </button>
 
     <!-- Watching -->
     <div v-else-if="watched && !editing" class="border rounded p-3 bg-light">
       <div class="d-flex justify-content-between align-items-start gap-2">
         <div>
-          <span class="badge bg-primary mb-1">&#128065; Watching</span>
+          <span class="badge bg-primary mb-1"><AppIcon name="eye" :size="14" /> Watching</span>
           <p class="small mb-1">
             Saved at {{ formatRM(watched.price_when_added) }}
             <span v-if="change.direction === 'down'" class="text-success fw-semibold">

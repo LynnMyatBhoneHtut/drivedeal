@@ -7,9 +7,12 @@
 // Extra (optional): @change="({ likes, liked }) => ..." fires after the server confirms,
 // e.g. the Liked cars page uses it to remove a car when it is unliked.
 //
+// compact: a 36px round heart without the count text (used on car cards).
+//
 // Guests are sent to the login page and come back here afterwards.
 // The heart changes straight away (optimistic update) and goes back if the server fails.
 import { ref, watch } from 'vue'
+import AppIcon from './AppIcon.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { apiDelete, apiPost } from '../services/api'
 import { currentUser } from '../services/auth'
@@ -17,7 +20,8 @@ import { currentUser } from '../services/auth'
 const props = defineProps({
   listingId: { type: [Number, String], required: true },
   likes: { type: Number, default: 0 }, // starting count
-  liked: { type: Boolean, default: false } // has the logged-in user liked it already?
+  liked: { type: Boolean, default: false }, // has the logged-in user liked it already?
+  compact: { type: Boolean, default: false } // round icon-only button (car cards)
 })
 const emit = defineEmits(['change'])
 
@@ -75,18 +79,20 @@ async function toggle() {
   <span class="like-button d-inline-flex flex-column align-items-start">
     <button
       type="button"
-      class="btn btn-sm"
-      :class="isLiked ? 'btn-danger' : 'btn-outline-danger'"
+      class="like-btn"
+      :class="{ 'is-liked': isLiked, 'is-compact': compact }"
       :aria-pressed="isLiked"
       :aria-label="isLiked ? `Unlike (${count} likes)` : `Like (${count} likes)`"
-      :title="currentUser ? '' : 'Log in to like cars'"
+      :title="currentUser ? (isLiked ? 'Unlike' : 'Like') : 'Log in to like cars'"
       :disabled="busy"
       @click="toggle"
     >
-      <span aria-hidden="true">{{ isLiked ? '♥' : '♡' }}</span>
-      {{ count }} {{ count === 1 ? 'like' : 'likes' }}
+      <AppIcon :name="isLiked ? 'heart-filled' : 'heart'" :size="compact ? 18 : 20" />
+      <span v-if="!compact">{{ count }} {{ count === 1 ? 'like' : 'likes' }}</span>
     </button>
-    <small v-if="errorMessage" class="text-danger mt-1" role="alert">{{ errorMessage }}</small>
+    <small v-if="errorMessage" class="like-error text-danger mt-1" role="alert">
+      {{ errorMessage }}
+    </small>
   </span>
 </template>
 
@@ -95,5 +101,70 @@ async function toggle() {
 .like-button {
   position: relative;
   z-index: 2;
+}
+
+.like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--dd-line);
+  border-radius: var(--dd-radius-pill);
+  background: var(--dd-white);
+  color: var(--dd-ink);
+  font-weight: 600;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.like-btn:hover:not(:disabled) {
+  border-color: var(--dd-danger);
+  color: var(--dd-danger);
+}
+
+.like-btn.is-liked {
+  border-color: var(--dd-danger-50);
+  background: var(--dd-danger-50);
+  color: var(--dd-danger);
+}
+
+.like-btn:disabled {
+  opacity: 0.7;
+}
+
+.like-btn.is-compact {
+  justify-content: center;
+  width: 36px;
+  min-height: 0;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  box-shadow: var(--dd-shadow);
+}
+
+.like-btn.is-compact.is-liked {
+  background: var(--dd-white);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .like-btn.is-liked :deep(svg) {
+    animation: like-pop 0.3s ease;
+  }
+}
+
+@keyframes like-pop {
+  50% {
+    transform: scale(1.25);
+  }
+}
+
+.like-error {
+  max-width: 180px;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  background: var(--dd-white);
 }
 </style>
