@@ -17,6 +17,7 @@ import WatchlistView from '../views/WatchlistView.vue' // D/HD: price-drop watch
 import SellCarView from '../views/SellCarView.vue'
 import EditListingView from '../views/EditListingView.vue'
 import MyListingsView from '../views/MyListingsView.vue'
+import MyOffersView from '../views/MyOffersView.vue' // Lynn - individual feature (offers)
 
 // All 12 routes, agreed in the group task plan. Shared file: don't change it without telling the group.
 // meta.requiresAuth -> must be logged in (checked in guards.js)
@@ -51,6 +52,8 @@ const routes = [
     component: MyListingsView,
     meta: { requiresAuth: true }
   },
+  // Lynn - individual feature: Make-an-Offer & Negotiation
+  { path: '/offers', name: 'my-offers', component: MyOffersView, meta: { requiresAuth: true } },
 
   // Lai - must stay last: catches every unknown URL
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView }

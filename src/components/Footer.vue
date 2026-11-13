@@ -19,6 +19,7 @@ const columns = [
       { label: 'Sign in', to: { name: 'login' } },
       { label: 'Register', to: { name: 'register' } },
       { label: 'My listings', to: { name: 'my-listings' } },
+      { label: 'My offers', to: { name: 'my-offers' } },
       { label: 'Liked cars', to: { name: 'liked' } }
     ]
   },

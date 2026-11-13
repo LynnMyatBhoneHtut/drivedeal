@@ -154,6 +154,11 @@ function handleLogout() {
                   </router-link>
                 </li>
                 <li>
+                  <router-link class="dropdown-item" :to="{ name: 'my-offers' }">
+                    <AppIcon name="tag" :size="18" /> My offers
+                  </router-link>
+                </li>
+                <li>
                   <router-link class="dropdown-item" :to="{ name: 'liked' }">
                     <AppIcon name="heart" :size="18" /> Liked cars
                   </router-link>

@@ -2,9 +2,13 @@
 // My listings dashboard - /my-listings
 // OWNER: Lynn
 // The logged-in user's cars (listings.php?seller_id=) with View / Edit / Delete,
-// a status summary, and buyer enquiries (inquiries.php?seller_id=) in InquiryList.
+// a status summary, buyer offers (offers.php?seller_id=, Lynn's individual feature)
+// and buyer enquiries (inquiries.php?seller_id=) in InquiryList.
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import InquiryList from '../components/InquiryList.vue'
+import OfferInbox from '../components/OfferInbox.vue'
+import { fetchOffers } from '../services/offersApi'
 import AppIcon from '../components/AppIcon.vue'
 import PageHeader from '../components/PageHeader.vue'
 import { apiDelete, apiGet, imageUrl } from '../services/api'
@@ -17,6 +21,12 @@ const carsError = ref('')
 const inquiries = ref([])
 const loadingInquiries = ref(false)
 const inquiriesError = ref('')
+
+const offers = ref([])
+const loadingOffers = ref(false)
+const offersError = ref('')
+const offerTab = ref('open')
+const route = useRoute()
 
 const carToDelete = ref(null)
 const deleting = ref(false)
@@ -78,13 +88,52 @@ async function loadInquiries(userId) {
   }
 }
 
+async function loadOffers(userId, { quiet = false } = {}) {
+  if (!quiet) loadingOffers.value = true
+  offersError.value = ''
+  try {
+    offers.value = await fetchOffers({ seller_id: userId })
+  } catch (e) {
+    offersError.value = e.message
+  } finally {
+    loadingOffers.value = false
+  }
+}
+
+const openOffers = computed(() => offers.value.filter((o) => o.status === 'open'))
+const otherOffers = computed(() => offers.value.filter((o) => o.status !== 'open'))
+const shownOffers = computed(() =>
+  offerTab.value === 'open' ? openOffers.value : otherOffers.value
+)
+const waitingForMe = computed(
+  () => openOffers.value.filter((o) => o.summary.turn === 'seller').length
+)
+
+/** After a reply: a deal reserves the car and closes the other offers, so refresh both lists. */
+function onOfferUpdated(offer) {
+  const index = offers.value.findIndex((o) => o.offer_id === offer.offer_id)
+  if (index !== -1) offers.value.splice(index, 1, offer)
+  if (offer.status === 'accepted') {
+    const car = cars.value.find((c) => c.listing_id === offer.listing_id)
+    if (car) car.status = offer.car_status
+    loadOffers(currentUser.value.user_id, { quiet: true })
+  }
+}
+
 function loadAll() {
   const user = currentUser.value
   cars.value = []
   inquiries.value = []
+  offers.value = []
   if (!user) return
-  loadCars(user.user_id)
   loadInquiries(user.user_id)
+  Promise.all([loadCars(user.user_id), loadOffers(user.user_id)]).then(async () => {
+    // Coming from "Manage offers" on a car page: jump to the offers once everything is shown
+    if (route.hash !== '#offers') return
+    await nextTick()
+    const section = document.getElementById('offers')
+    if (section) section.scrollIntoView({ block: 'start', behavior: 'instant' })
+  })
 }
 
 // Load now, and again if a different user logs in
@@ -269,6 +318,78 @@ onBeforeUnmount(() => document.body.classList.remove('modal-open'))
           </div>
         </template>
 
+        <!-- Offers (Lynn's individual feature) -->
+        <section id="offers" class="offers-section mb-5" aria-labelledby="offersTitle">
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <h2 id="offersTitle" class="h3 mb-0">Offers on your cars</h2>
+              <span
+                v-if="waitingForMe"
+                class="enquiry-count"
+                :title="`${waitingForMe} waiting for your reply`"
+              >
+                {{ waitingForMe }}
+              </span>
+            </div>
+            <div v-if="offers.length" class="offer-tabs" role="tablist" aria-label="Filter offers">
+              <button
+                type="button"
+                role="tab"
+                class="offer-tab"
+                :class="{ active: offerTab === 'open' }"
+                :aria-selected="offerTab === 'open'"
+                @click="offerTab = 'open'"
+              >
+                Open <span class="tab-count">{{ openOffers.length }}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                class="offer-tab"
+                :class="{ active: offerTab === 'done' }"
+                :aria-selected="offerTab === 'done'"
+                @click="offerTab = 'done'"
+              >
+                Agreed &amp; ended <span class="tab-count">{{ otherOffers.length }}</span>
+              </button>
+            </div>
+          </div>
+          <p v-if="waitingForMe" class="small fw-semibold text-primary" role="status">
+            {{ waitingForMe }} {{ waitingForMe === 1 ? 'buyer is' : 'buyers are' }} waiting for your
+            reply.
+          </p>
+
+          <div v-if="loadingOffers" aria-busy="true">
+            <div class="dd-skeleton mb-2" style="height: 200px"></div>
+            <span class="visually-hidden" role="status">Loading offers...</span>
+          </div>
+          <div v-else-if="offersError" class="alert alert-danger" role="alert">
+            {{ offersError }}
+          </div>
+          <div v-else-if="!offers.length" class="dd-empty">
+            <span class="dd-icon-circle"><AppIcon name="tag" :size="28" /></span>
+            <h3>No offers yet</h3>
+            <p class="mb-0">
+              When buyers make an offer on your cars, you can accept, reject or counter it here.
+            </p>
+          </div>
+          <template v-else>
+            <p v-if="!shownOffers.length" class="text-muted">
+              {{
+                offerTab === 'open' ? 'No open offers right now.' : 'No agreed or ended offers yet.'
+              }}
+            </p>
+            <OfferInbox
+              :key="offerTab"
+              :offers="shownOffers"
+              role="seller"
+              show-car
+              class="offers-list"
+              @updated="onOfferUpdated"
+            />
+          </template>
+        </section>
+
         <!-- Enquiries -->
         <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
           <h2 class="h3 mb-0">Enquiries from buyers</h2>
@@ -418,6 +539,48 @@ onBeforeUnmount(() => document.body.classList.remove('modal-open'))
 .listing-actions .btn {
   --bs-btn-padding-x: 0.4rem;
   gap: 0.3rem;
+}
+
+.offers-list {
+  max-width: 860px;
+}
+
+.offer-tabs {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: var(--dd-radius-pill);
+  background: var(--dd-surface);
+  border: 1px solid var(--dd-line);
+}
+
+.offer-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  padding: 0.35rem 1rem;
+  border: 0;
+  border-radius: var(--dd-radius-pill);
+  background: transparent;
+  color: var(--dd-body);
+  font-weight: 600;
+}
+
+.offer-tab.active {
+  background: var(--dd-white);
+  color: var(--dd-primary);
+  box-shadow: var(--dd-shadow-sm);
+}
+
+.tab-count {
+  min-width: 22px;
+  padding: 0 6px;
+  border-radius: var(--dd-radius-pill);
+  background: var(--dd-primary-50);
+  color: var(--dd-primary-700);
+  font-size: 0.75rem;
+  text-align: center;
 }
 
 .enquiry-count {
