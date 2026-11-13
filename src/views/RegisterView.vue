@@ -6,6 +6,8 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import RegisterForm from '../components/RegisterForm.vue'
+import AuthShell from '../components/AuthShell.vue'
+import AppIcon from '../components/AppIcon.vue'
 import { apiPost } from '../services/api'
 import { currentUser, setUser } from '../services/auth'
 import { fieldForServerError, safeRedirect } from '../services/accountRules'
@@ -41,36 +43,42 @@ async function register(details) {
 </script>
 
 <template>
-  <section class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-12 col-sm-10 col-md-8 col-lg-6">
-        <div v-if="currentUser" class="alert alert-info text-center" role="status">
-          You already have an account and are logged in as
-          <strong>{{ currentUser.full_name }}</strong
-          >.
-          <router-link :to="{ name: 'profile' }" class="alert-link">Go to your profile</router-link>
-        </div>
-
-        <div v-else class="card shadow-sm">
-          <div class="card-body p-4">
-            <h1 class="h3 mb-1">Create an account</h1>
-            <p class="text-muted mb-4">
-              Like cars, contact sellers and list your own car for sale.
-            </p>
-
-            <div v-if="generalError" class="alert alert-danger py-2" role="alert">
-              {{ generalError }}
-            </div>
-
-            <RegisterForm :saving="saving" :server-error="errorMessage" @submit="register" />
-
-            <p class="text-center mt-4 mb-0">
-              Already have an account?
-              <router-link :to="{ name: 'login', query: route.query }">Log in</router-link>
-            </p>
-          </div>
-        </div>
-      </div>
+  <AuthShell
+    headline="Join DriveDeal in under a minute"
+    :benefits="[
+      'Free to list your car with photos',
+      'Contact sellers directly, no middlemen',
+      'Save cars you like and compare them'
+    ]"
+  >
+    <div v-if="currentUser" class="text-center">
+      <span class="dd-icon-circle mb-3"><AppIcon name="check" :size="22" /></span>
+      <h1 class="h2 mb-2">You already have an account</h1>
+      <p class="text-muted">
+        You're signed in as <strong>{{ currentUser.full_name }}</strong
+        >.
+      </p>
+      <router-link :to="{ name: 'profile' }" class="btn btn-primary w-100">
+        Go to your profile
+      </router-link>
     </div>
-  </section>
+
+    <template v-else>
+      <h1 class="h2 mb-1">Create an account</h1>
+      <p class="text-muted mb-4">Like cars, contact sellers and list your own car for sale.</p>
+
+      <div v-if="generalError" class="alert alert-danger py-2" role="alert">
+        {{ generalError }}
+      </div>
+
+      <RegisterForm :saving="saving" :server-error="errorMessage" @submit="register" />
+
+      <p class="text-center text-muted mt-4 mb-0">
+        Already have an account?
+        <router-link :to="{ name: 'login', query: route.query }" class="fw-semibold">
+          Sign in
+        </router-link>
+      </p>
+    </template>
+  </AuthShell>
 </template>
