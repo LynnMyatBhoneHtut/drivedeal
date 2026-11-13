@@ -161,7 +161,7 @@ onBeforeUnmount(() => {
 
 <template>
   <section class="comparison-section p-4 mt-4">
-    <h3 class="h4 fw-bold mb-2">
+    <h3 class="h5 mb-2">
       Interactive Car Comparison
     </h3>
 
@@ -192,7 +192,7 @@ onBeforeUnmount(() => {
 
     <!-- Accessible alternative to the chart -->
     <details class="mt-3">
-      <summary class="fw-semibold">
+      <summary class="fw-semibold table-toggle">
         View comparison scores as a table
       </summary>
 
@@ -226,6 +226,17 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.comparison-section {
+  background: var(--dd-white);
+  border: 1px solid var(--dd-line);
+  border-radius: var(--dd-radius);
+}
+
+.table-toggle {
+  color: var(--dd-primary);
+  cursor: pointer;
+}
+
 .chart-scroll {
   width: 100%;
   max-width: 100%;

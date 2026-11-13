@@ -17,13 +17,9 @@ const props = defineProps({
 const selectedIndex = ref(0)
 const failedImages = ref({})
 
-const availableImages = computed(() =>
-  props.images.filter(image => image && image.image_path)
-)
+const availableImages = computed(() => props.images.filter((image) => image && image.image_path))
 
-const currentImage = computed(() =>
-  availableImages.value[selectedIndex.value] || null
-)
+const currentImage = computed(() => availableImages.value[selectedIndex.value] || null)
 
 // Reset the gallery when a different car is loaded
 watch(
@@ -43,8 +39,7 @@ function previousImage() {
   const count = availableImages.value.length
 
   if (count > 0) {
-    selectedIndex.value =
-      (selectedIndex.value - 1 + count) % count
+    selectedIndex.value = (selectedIndex.value - 1 + count) % count
   }
 }
 
@@ -52,8 +47,7 @@ function nextImage() {
   const count = availableImages.value.length
 
   if (count > 0) {
-    selectedIndex.value =
-      (selectedIndex.value + 1) % count
+    selectedIndex.value = (selectedIndex.value + 1) % count
   }
 }
 
@@ -70,24 +64,25 @@ function handleImageError(path) {
     <!-- Main image -->
     <div class="main-image">
       <img
-v-if="
-        currentImage &&
-        !failedImages[currentImage.image_path]
-      " :src="imageUrl(currentImage.image_path)" :alt="`${carName} - photo ${selectedIndex + 1}`"
-        @error="handleImageError(currentImage.image_path)" />
+        v-if="currentImage && !failedImages[currentImage.image_path]"
+        :src="imageUrl(currentImage.image_path)"
+        :alt="`${carName} - photo ${selectedIndex + 1}`"
+        @error="handleImageError(currentImage.image_path)"
+      />
 
       <div v-else class="image-placeholder">
-        <p class="mb-2 fw-semibold">
-          No photo available
-        </p>
-        <p class="mb-0 small">
-          Vehicle images will appear here when uploaded.
-        </p>
+        <p class="mb-2 fw-semibold">No photo available</p>
+        <p class="mb-0 small">Vehicle images will appear here when uploaded.</p>
       </div>
 
       <!-- Navigation arrows -->
       <template v-if="availableImages.length > 1">
-        <button type="button" class="gallery-arrow previous" aria-label="Previous photo" @click="previousImage">
+        <button
+          type="button"
+          class="gallery-arrow previous"
+          aria-label="Previous photo"
+          @click="previousImage"
+        >
           <AppIcon name="chevron-left" :size="22" />
         </button>
 
@@ -103,15 +98,29 @@ v-if="
     </div>
 
     <!-- Thumbnail gallery -->
-    <div v-if="availableImages.length > 1" class="thumbnail-list" role="group" aria-label="Choose vehicle photo">
+    <div
+      v-if="availableImages.length > 1"
+      class="thumbnail-list"
+      role="group"
+      aria-label="Choose vehicle photo"
+    >
       <button
-v-for="(image, index) in availableImages" :key="image.image_id || image.image_path" type="button"
-        class="thumbnail-button" :class="{ selected: selectedIndex === index }"
-        :aria-label="`View photo ${index + 1} of ${carName}`" :aria-pressed="selectedIndex === index"
-        @click="selectImage(index)">
+        v-for="(image, index) in availableImages"
+        :key="image.image_id || image.image_path"
+        type="button"
+        class="thumbnail-button"
+        :class="{ selected: selectedIndex === index }"
+        :aria-label="`View photo ${index + 1} of ${carName}`"
+        :aria-pressed="selectedIndex === index"
+        @click="selectImage(index)"
+      >
         <img
-v-if="!failedImages[image.image_path]" :src="imageUrl(image.image_path)" :alt="`Thumbnail ${index + 1}`"
-          loading="lazy" @error="handleImageError(image.image_path)" />
+          v-if="!failedImages[image.image_path]"
+          :src="imageUrl(image.image_path)"
+          :alt="`Thumbnail ${index + 1}`"
+          loading="lazy"
+          @error="handleImageError(image.image_path)"
+        />
         <span v-else>Photo unavailable</span>
       </button>
     </div>
@@ -121,13 +130,13 @@ v-if="!failedImages[image.image_path]" :src="imageUrl(image.image_path)" :alt="`
 <style scoped>
 .main-image {
   position: relative;
-  height: 380px;
+  aspect-ratio: 16 / 10;
   background: var(--dd-surface);
   border-radius: var(--dd-radius);
   overflow: hidden;
 }
 
-.main-image>img {
+.main-image > img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -148,57 +157,71 @@ v-if="!failedImages[image.image_path]" :src="imageUrl(image.image_path)" :alt="`
 .gallery-arrow {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
-  background: var(--dd-overlay);
-  color: var(--dd-white);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: 50%;
-  width: 42px;
-  height: 42px;
-  font-size: 18px;
+  background: var(--dd-white);
+  color: var(--dd-ink);
+  box-shadow: var(--dd-shadow);
+  transform: translateY(-50%);
   cursor: pointer;
 }
 
 .gallery-arrow:hover {
   background: var(--dd-primary);
+  color: var(--dd-white);
 }
 
 .previous {
-  left: 15px;
+  left: 14px;
 }
 
 .next {
-  right: 15px;
+  right: 14px;
 }
 
 .image-counter {
   position: absolute;
-  bottom: 15px;
-  right: 15px;
+  bottom: 14px;
+  right: 14px;
+  padding: 5px 12px;
+  border-radius: var(--dd-radius-pill);
   background: var(--dd-overlay);
   color: var(--dd-white);
-  padding: 6px 12px;
-  border-radius: var(--dd-radius-pill);
-  font-size: 13px;
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 .thumbnail-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 15px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .thumbnail-button {
-  width: 90px;
-  height: 70px;
+  width: 96px;
+  aspect-ratio: 4 / 3;
   padding: 0;
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--dd-radius-sm);
   overflow: hidden;
   background: var(--dd-surface);
   color: var(--dd-muted);
   font-size: 11px;
+  opacity: 0.75;
+  transition:
+    opacity 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.thumbnail-button:hover,
+.thumbnail-button.selected {
+  opacity: 1;
 }
 
 .thumbnail-button.selected {
@@ -211,9 +234,9 @@ v-if="!failedImages[image.image_path]" :src="imageUrl(image.image_path)" :alt="`
   object-fit: cover;
 }
 
-@media (max-width: 767px) {
-  .main-image {
-    height: 250px;
+@media (max-width: 575.98px) {
+  .thumbnail-button {
+    width: 72px;
   }
 }
 </style>

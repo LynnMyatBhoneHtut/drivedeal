@@ -2,6 +2,7 @@
 import { computed, ref, toRef, watch } from 'vue'
 import { useCarRecommendations } from '../composables/useCarRecommendations'
 import CarComparisonChart from './CarComparisonChart.vue'
+import AppIcon from './AppIcon.vue'
 
 const props = defineProps({
   cars: {
@@ -175,21 +176,21 @@ function getScoreDetails(car) {
 </script>
 
 <template>
-  <section class="smart-match p-3 p-md-4 mb-4">
-    <div
-class="d-flex flex-wrap justify-content-between
-                align-items-center gap-3 mb-4">
-      <div>
-        <p class="section-label mb-2">PERSONALISED SEARCH</p>
-        <h2 class="h3 fw-bold mb-2">Smart Car Match</h2>
-        <p class="text-muted mb-0">
-          Tell us what matters to you and discover
-          cars that match your preferences.
-        </p>
+  <section class="smart-match p-3 p-md-4 mb-4 mb-lg-5" aria-labelledby="smartMatchTitle">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+      <div class="d-flex align-items-start gap-3">
+        <span class="smart-icon"><AppIcon name="sparkles" :size="24" /></span>
+        <div>
+          <span class="dd-eyebrow mb-1">Personalised search</span>
+          <h2 id="smartMatchTitle" class="h3 mb-1">Smart Match</h2>
+          <p class="text-muted mb-0">
+            Tell us what matters to you and we'll rank the cars that fit best.
+          </p>
+        </div>
       </div>
 
-      <button type="button" class="btn btn-outline-primary" @click="resetPreferences">
-        Reset Preferences
+      <button type="button" class="btn btn-outline-primary btn-sm" @click="resetPreferences">
+        Reset preferences
       </button>
     </div>
 
@@ -282,7 +283,7 @@ id="matchMileage" v-model.number="preferences.maxMileage" type="range" class="fo
 
     <!-- Recommendation results -->
     <div v-if="activeWeightTotal > 0">
-      <h3 class="h4 fw-bold mb-2">
+      <h3 class="h5 mb-2">
         Your Recommended Cars
       </h3>
 
@@ -317,7 +318,7 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
             </p>
 
             <p class="text-muted small">
-              {{ car.year }} Â·
+              {{ car.year }} Ã‚Â·
               {{ formatNumber(car.mileage_km) }} km
             </p>
 
@@ -329,7 +330,7 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
 
 
             <!-- Explain each recommendation score -->
-            <details class="border rounded p-3 mb-3">
+            <details class="score-details mb-3">
               <summary class="fw-semibold">
                 Why this score?
               </summary>
@@ -345,7 +346,7 @@ v-for="factor in getScoreDetails(car)" :key="factor.key"
                 <div class="small">
                   <strong>{{ factor.label }}</strong>
                   <div class="text-muted">
-                    {{ factor.score }}/100 Ã— {{ factor.weight }}% importance
+                    {{ factor.score }}/100 Ãƒâ€” {{ factor.weight }}% importance
                   </div>
                 </div>
 
@@ -450,38 +451,46 @@ v-if="activeWeightTotal > 0" :cars="comparisonCars"
 .smart-match {
   background: var(--dd-primary-50);
   border: 1px solid var(--dd-primary-100);
-  border-radius: var(--dd-radius);
+  border-radius: var(--dd-radius-lg);
 }
 
-.section-label {
-  color: var(--dd-primary);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+.smart-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--dd-radius);
+  background: var(--dd-gradient);
+  color: var(--dd-white);
+  box-shadow: var(--dd-shadow);
 }
 
 .match-value {
   color: var(--dd-primary);
   font-size: 1.125rem;
+  font-weight: 800;
 }
 
 .weights-panel {
   background: var(--dd-white);
   border: 1px solid var(--dd-line);
-  border-radius: 12px;
+  border-radius: var(--dd-radius);
 }
 
 .recommendation-card {
   background: var(--dd-white);
   border: 1px solid var(--dd-line);
-  border-radius: 12px;
+  border-radius: var(--dd-radius);
+  box-shadow: var(--dd-shadow-sm);
 }
 
 .score-label {
-  background: var(--dd-primary-50);
-  color: var(--dd-primary-700);
-  border-radius: 8px;
-  padding: 6px 10px;
+  background: var(--dd-primary);
+  color: var(--dd-white);
+  border-radius: var(--dd-radius-pill);
+  padding: 5px 11px;
   font-size: 0.8125rem;
   font-weight: 700;
   white-space: nowrap;
@@ -489,5 +498,17 @@ v-if="activeWeightTotal > 0" :cars="comparisonCars"
 
 .match-progress {
   background: var(--dd-primary);
+}
+
+.score-details {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--dd-line);
+  border-radius: var(--dd-radius-sm);
+  background: var(--dd-surface);
+}
+
+.score-details summary {
+  color: var(--dd-primary);
+  cursor: pointer;
 }
 </style>
