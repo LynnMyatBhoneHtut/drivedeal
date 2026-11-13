@@ -56,11 +56,19 @@ const criteria = computed(() => {
   return items
 })
 
-const chartColors = [
-  '#c2410c',
-  '#1c2228',
-  '#0f766e'
-]
+// Brand colours come from the design tokens in main.css (--dd-chart-1..3)
+function readToken(name, fallback) {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  return value || fallback
+}
+
+const chartColors = ['--dd-chart-1', '--dd-chart-2', '--dd-chart-3'].map((name) =>
+  readToken(name, 'currentColor')
+)
+
+Chart.defaults.font.family = readToken('--dd-font', 'system-ui, sans-serif')
+Chart.defaults.color = readToken('--dd-muted', 'gray')
+Chart.defaults.borderColor = readToken('--dd-line', 'lightgray')
 
 
 function getScore(car, key) {
@@ -229,11 +237,6 @@ onBeforeUnmount(() => {
   position: relative;
   width: 100%;
   height: 350px;
-}
-
-.chart-scroll:focus-visible {
-  outline: 2px solid #c2410c;
-  outline-offset: 2px;
 }
 
 @media (max-width: 767px) {

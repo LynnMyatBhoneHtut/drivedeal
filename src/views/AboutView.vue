@@ -51,7 +51,7 @@ async function submitForm() {
 
     <!-- About section -->
     <section class="container py-5">
-      <div class="row align-items-center g-5">
+      <div class="row align-items-center g-4 g-lg-5">
         <div class="col-12 col-lg-7">
           <p class="section-label">WHO WE ARE</p>
 
@@ -84,7 +84,7 @@ async function submitForm() {
             </h3>
 
             <div class="feature-item">
-              <span class="feature-icon" aria-hidden="true">✓</span>
+              <span class="feature-icon" aria-hidden="true">Ã¢Å“â€œ</span>
               <div>
                 <strong>Explore Cars</strong>
                 <p class="text-muted mb-0">
@@ -94,7 +94,7 @@ async function submitForm() {
             </div>
 
             <div class="feature-item">
-              <span class="feature-icon" aria-hidden="true">✓</span>
+              <span class="feature-icon" aria-hidden="true">Ã¢Å“â€œ</span>
               <div>
                 <strong>View Vehicle Details</strong>
                 <p class="text-muted mb-0">
@@ -104,7 +104,7 @@ async function submitForm() {
             </div>
 
             <div class="feature-item">
-              <span class="feature-icon" aria-hidden="true">✓</span>
+              <span class="feature-icon" aria-hidden="true">Ã¢Å“â€œ</span>
               <div>
                 <strong>Connect With Sellers</strong>
                 <p class="text-muted mb-0">
@@ -120,7 +120,7 @@ async function submitForm() {
     <!-- Contact section -->
     <section class="contact-section py-5">
       <div class="container">
-        <div class="row g-5">
+        <div class="row g-4 g-lg-5">
           <div class="col-12 col-lg-5">
             <p class="section-label">GET IN TOUCH</p>
 
@@ -179,7 +179,7 @@ id="contactMessage" v-model.trim="form.message" class="form-control" rows="5" mi
                   {{ errorMessage }}
                 </div>
 
-                <button type="submit" class="btn btn-copper px-4" :disabled="isSubmitting">
+                <button type="submit" class="btn btn-primary px-4" :disabled="isSubmitting">
                   {{ isSubmitting ? 'Sending...' : 'Send Message' }}
                 </button>
               </form>
@@ -193,24 +193,27 @@ id="contactMessage" v-model.trim="form.message" class="form-control" rows="5" mi
 
 <style scoped>
 .about-header {
-  background: #1c2228;
+  background: var(--dd-gradient);
+}
+
+.about-header h1 {
+  color: var(--dd-white);
 }
 
 .about-header p {
-  color: #e8e3df;
+  color: var(--dd-white-70);
 }
 
 .section-label {
-  color: #c2410c;
-  font-size: 13px;
+  color: var(--dd-primary);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.12em;
 }
 
 .about-card {
-  background: #faf8f5;
-  border: 1px solid #e9e5e1;
-  border-radius: 14px;
+  background: var(--dd-surface);
+  border-radius: var(--dd-radius);
   padding: 30px;
 }
 
@@ -229,8 +232,8 @@ id="contactMessage" v-model.trim="form.message" class="form-control" rows="5" mi
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #c2410c;
-  color: white;
+  background: var(--dd-primary);
+  color: var(--dd-white);
   border-radius: 50%;
   width: 28px;
   height: 28px;
@@ -238,41 +241,18 @@ id="contactMessage" v-model.trim="form.message" class="form-control" rows="5" mi
 }
 
 .contact-section {
-  background: #faf8f5;
+  background: var(--dd-surface);
 }
 
 .contact-card {
-  background: white;
-  border: 1px solid #e9e5e1;
-  border-radius: 14px;
+  background: var(--dd-white);
+  border: 1px solid var(--dd-line);
+  border-radius: var(--dd-radius);
+  box-shadow: var(--dd-shadow-sm);
   padding: 35px;
 }
 
-.form-control:focus {
-  border-color: #c2410c;
-  box-shadow: 0 0 0 0.2rem rgba(194, 65, 12, 0.15);
-}
-
-.btn-copper {
-  background: #c2410c;
-  border: 1px solid #c2410c;
-  color: white;
-  font-weight: 600;
-}
-
-.btn-copper:hover {
-  background: #9a3412;
-  border-color: #9a3412;
-  color: white;
-}
-
-.btn-copper:disabled {
-  background: #adadad;
-  border-color: #adadad;
-}
-
 @media (max-width: 767px) {
-
   .contact-card,
   .about-card {
     padding: 22px;

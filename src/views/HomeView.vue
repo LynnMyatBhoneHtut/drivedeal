@@ -45,7 +45,7 @@ onMounted(() => {
 <template>
   <div>
     <!-- Hero section -->
-    <section class="hero-section text-white">
+    <section class="hero-section">
       <div class="container">
         <div class="row align-items-center g-4">
 
@@ -69,11 +69,11 @@ onMounted(() => {
             </p>
 
             <div class="d-flex flex-wrap gap-3">
-              <router-link :to="{ name: 'cars' }" class="btn btn-copper btn-lg px-4">
+              <router-link :to="{ name: 'cars' }" class="btn btn-primary btn-lg px-4">
                 Browse Cars
               </router-link>
 
-              <router-link :to="{ name: 'sell' }" class="btn btn-outline-light btn-lg px-4">
+              <router-link :to="{ name: 'sell' }" class="btn btn-outline-primary btn-lg px-4">
                 Sell a Car
               </router-link>
             </div>
@@ -86,7 +86,7 @@ onMounted(() => {
 :src="heroImage" alt="Black sports car against a grey backdrop" class="hero-photo-img" width="900"
                 height="600" />
 
-              <div class="hero-photo-label">
+              <div class="hero-photo-label dd-glass">
                 DISCOVER YOUR NEXT DRIVE
               </div>
             </div>
@@ -108,7 +108,7 @@ class="d-flex flex-wrap justify-content-between
           </p>
         </div>
 
-        <router-link :to="{ name: 'cars' }" class="btn btn-outline-dark">
+        <router-link :to="{ name: 'cars' }" class="btn btn-outline-primary">
           View All Cars
         </router-link>
       </div>
@@ -199,7 +199,7 @@ class="d-flex flex-wrap justify-content-between
         Start exploring the available listings today.
       </p>
 
-      <router-link :to="{ name: 'cars' }" class="btn btn-copper btn-lg px-5">
+      <router-link :to="{ name: 'cars' }" class="btn btn-primary btn-lg px-5">
         Explore Cars
       </router-link>
     </section>
@@ -207,19 +207,17 @@ class="d-flex flex-wrap justify-content-between
 </template>
 
 <style scoped>
-/* Hero section */
+/* Hero section (rebuilt in Phase 2) */
 .hero-section {
-  background: linear-gradient(135deg,
-      #1c2228 0%,
-      #343d44 100%);
+  background: var(--dd-hero-bg);
   padding: 85px 0;
 }
 
 .hero-label {
-  color: #ffb181;
-  font-size: 13px;
+  color: var(--dd-primary);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 0.12em;
 }
 
 .hero-title {
@@ -229,23 +227,22 @@ class="d-flex flex-wrap justify-content-between
 
 .hero-highlight {
   display: block;
-  color: #ffb181;
+  color: var(--dd-primary);
 }
 
 .hero-description {
   max-width: 560px;
-  color: #e8e3df;
+  color: var(--dd-muted);
   font-size: 1.1rem;
   line-height: 1.7;
 }
 
-/* Hero photograph */
 .hero-photo {
   position: relative;
   overflow: hidden;
-  border-radius: 18px;
-  background: #161b20;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--dd-radius-lg);
+  background: var(--dd-surface);
+  box-shadow: var(--dd-shadow);
 }
 
 .hero-photo-img {
@@ -261,59 +258,31 @@ class="d-flex flex-wrap justify-content-between
   left: 18px;
   right: 18px;
   padding: 12px 16px;
-  border-left: 4px solid #ffb181;
-  background: rgba(28, 34, 40, 0.88);
-  color: white;
-  font-size: 13px;
+  border-radius: var(--dd-radius-sm);
+  color: var(--dd-ink);
+  font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.1em;
 }
 
-/* Main accent buttons */
-.btn-copper {
-  background-color: #c2410c;
-  border: 1px solid #c2410c;
-  color: white;
-  font-weight: 600;
-}
-
-.btn-copper:hover {
-  background-color: #9a3412;
-  border-color: #9a3412;
-  color: white;
-}
-
-.btn-copper:focus-visible {
-  outline: 3px solid #ffb181;
-  outline-offset: 3px;
-}
-
-/* How DriveDeal Works */
 .how-it-works {
-  background: #faf8f5;
+  background: var(--dd-surface);
 }
 
 .step-card {
   padding: 30px 22px;
-  background: white;
-  border: 1px solid #e9e5e1;
-  border-radius: 12px;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.step-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+  background: var(--dd-white);
+  border: 1px solid var(--dd-line);
+  border-radius: var(--dd-radius);
 }
 
 .step-number {
   font-size: 30px;
   font-weight: 800;
-  color: #c2410c;
+  color: var(--dd-primary);
   margin-bottom: 15px;
 }
 
-/* Mobile responsiveness */
 @media (max-width: 767px) {
   .hero-section {
     padding: 55px 0;
@@ -321,17 +290,6 @@ class="d-flex flex-wrap justify-content-between
 
   .hero-photo-img {
     height: 260px;
-  }
-}
-
-/* Accessibility: Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .step-card {
-    transition: none;
-  }
-
-  .step-card:hover {
-    transform: none;
   }
 }
 </style>

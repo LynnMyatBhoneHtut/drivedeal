@@ -226,7 +226,7 @@ function handleLogout() {
               </div>
               <h2 class="h4 mb-1">{{ profile.full_name }}</h2>
               <p class="text-muted mb-2">{{ profile.email }}</p>
-              <span v-if="profile.role === 'admin'" class="badge bg-dark mb-2">Admin</span>
+              <span v-if="profile.role === 'admin'" class="badge bg-primary mb-2">Admin</span>
               <p v-if="memberSince" class="small text-muted mb-4">Member since {{ memberSince }}</p>
               <div class="d-grid gap-2">
                 <router-link :to="{ name: 'my-listings' }" class="btn btn-outline-primary">

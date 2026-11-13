@@ -23,9 +23,9 @@ const successMessage = ref('')
 const cancelButton = ref(null)
 
 const STATUS_BADGES = {
-  available: 'bg-success',
-  reserved: 'bg-warning text-dark',
-  sold: 'bg-secondary'
+  available: 'dd-status-available',
+  reserved: 'dd-status-reserved',
+  sold: 'dd-status-sold'
 }
 
 const summary = computed(() => {
@@ -208,7 +208,7 @@ onBeforeUnmount(() => document.body.classList.remove('modal-open'))
                   No photo
                 </div>
                 <span
-                  class="badge position-absolute top-0 end-0 m-2"
+                  class="dd-status position-absolute top-0 end-0 m-2"
                   :class="STATUS_BADGES[car.status]"
                 >
                   {{ statusLabel(car.status) }}

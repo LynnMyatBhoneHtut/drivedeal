@@ -1,10 +1,382 @@
-/* Site-wide styles. OWNER: Lai (layout and look).
-   Page-specific styles go in each page's own <style scoped> block instead. */
+/* DriveDeal design system - blue theme. See design/DESIGN.md.
+   Site-wide tokens, Bootstrap mapping and shared classes live here.
+   Page-specific styles go in each page's own <style scoped> block and use var(--dd-...) only:
+   never hard-code a hex colour in a component. */
+
+/* ---------- 1. Design tokens ---------- */
+:root {
+  --dd-primary: #1d5bf0;
+  --dd-primary-600: #1449d1;
+  --dd-primary-700: #0f3aa8;
+  --dd-primary-50: #eef3fe;
+  --dd-primary-100: #dce6fd;
+  --dd-primary-300: #8fb2ff;
+  --dd-navy: #0b1b3d;
+  --dd-ink: #0f172a;
+  --dd-body: #334155;
+  --dd-muted: #5b6b82;
+  --dd-line: #e3e8f0;
+  --dd-surface: #f5f7fb;
+  --dd-white: #ffffff;
+  --dd-success: #16a34a;
+  --dd-success-50: #e8f7ee;
+  --dd-warning: #d97706;
+  --dd-warning-text: #a35a05; /* amber text that passes AA on --dd-warning-50 */
+  --dd-warning-50: #fef3e2;
+  --dd-danger: #dc2626;
+  --dd-danger-600: #b91c1c;
+  --dd-danger-50: #fdecec;
+  --dd-gradient: linear-gradient(135deg, #1d5bf0 0%, #0f3aa8 100%);
+  --dd-hero-bg: linear-gradient(180deg, #eef3fe 0%, #ffffff 100%);
+  --dd-overlay: rgba(11, 27, 61, 0.72); /* dark scrim on photos (counters, captions) */
+  --dd-white-70: rgba(255, 255, 255, 0.7);
+  --dd-white-15: rgba(255, 255, 255, 0.15);
+
+  /* Chart series (CarComparisonChart reads these) */
+  --dd-chart-1: #1d5bf0;
+  --dd-chart-2: #0b1b3d;
+  --dd-chart-3: #8fb2ff;
+
+  --dd-radius-sm: 10px; /* buttons, inputs */
+  --dd-radius: 16px; /* cards */
+  --dd-radius-lg: 24px; /* large panels, hero image */
+  --dd-radius-pill: 999px;
+
+  --dd-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --dd-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px rgba(15, 23, 42, 0.07);
+  --dd-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.12);
+
+  --dd-font: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --dd-section-y: clamp(3rem, 2rem + 4vw, 6rem);
+  --dd-navbar-h: 72px;
+
+  /* ---------- 2. Bootstrap mapped onto the brand ---------- */
+  --bs-primary: #1d5bf0;
+  --bs-primary-rgb: 29, 91, 240;
+  --bs-primary-text-emphasis: #0f3aa8;
+  --bs-primary-bg-subtle: #eef3fe;
+  --bs-primary-border-subtle: #dce6fd;
+  --bs-success: #16a34a;
+  --bs-success-rgb: 22, 163, 74;
+  --bs-danger: #dc2626;
+  --bs-danger-rgb: 220, 38, 38;
+  --bs-warning: #d97706;
+  --bs-warning-rgb: 217, 119, 6;
+  --bs-secondary-color: #5b6b82;
+  --bs-link-color: #1d5bf0;
+  --bs-link-color-rgb: 29, 91, 240;
+  --bs-link-hover-color: #1449d1;
+  --bs-link-hover-color-rgb: 20, 73, 209;
+  --bs-body-font-family: var(--dd-font);
+  --bs-body-color: #334155;
+  --bs-body-color-rgb: 51, 65, 85;
+  --bs-heading-color: #0f172a;
+  --bs-emphasis-color: #0f172a;
+  --bs-border-color: #e3e8f0;
+  --bs-border-radius: 10px;
+  --bs-border-radius-lg: 16px;
+  --bs-focus-ring-color: rgba(29, 91, 240, 0.25);
+  --bs-form-valid-color: #16a34a;
+  --bs-form-valid-border-color: #16a34a;
+  --bs-form-invalid-color: #dc2626;
+  --bs-form-invalid-border-color: #dc2626;
+}
+
+.text-muted,
+.text-body-secondary {
+  color: var(--dd-muted) !important;
+}
+
+.btn {
+  --bs-btn-padding-x: 1.25rem;
+  --bs-btn-padding-y: 0.75rem;
+  --bs-btn-font-weight: 600;
+  --bs-btn-border-radius: var(--dd-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-sm {
+  --bs-btn-padding-x: 0.75rem;
+  --bs-btn-padding-y: 0.4rem;
+  --bs-btn-border-radius: 8px;
+}
+
+.btn-lg {
+  --bs-btn-padding-x: 1.6rem;
+  --bs-btn-padding-y: 0.9rem;
+  --bs-btn-font-size: 1.05rem;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--dd-primary);
+  --bs-btn-border-color: var(--dd-primary);
+  --bs-btn-hover-bg: var(--dd-primary-600);
+  --bs-btn-hover-border-color: var(--dd-primary-600);
+  --bs-btn-active-bg: var(--dd-primary-700);
+  --bs-btn-active-border-color: var(--dd-primary-700);
+  --bs-btn-disabled-bg: var(--dd-primary);
+  --bs-btn-disabled-border-color: var(--dd-primary);
+  --bs-btn-focus-shadow-rgb: 29, 91, 240;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--dd-primary);
+  --bs-btn-border-color: var(--dd-primary);
+  --bs-btn-hover-color: var(--dd-white);
+  --bs-btn-hover-bg: var(--dd-primary);
+  --bs-btn-hover-border-color: var(--dd-primary);
+  --bs-btn-active-color: var(--dd-white);
+  --bs-btn-active-bg: var(--dd-primary-600);
+  --bs-btn-active-border-color: var(--dd-primary-600);
+  --bs-btn-disabled-color: var(--dd-primary);
+  --bs-btn-disabled-border-color: var(--dd-primary);
+  --bs-btn-focus-shadow-rgb: 29, 91, 240;
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--dd-body);
+  --bs-btn-border-color: var(--dd-line);
+  --bs-btn-hover-color: var(--dd-ink);
+  --bs-btn-hover-bg: var(--dd-surface);
+  --bs-btn-hover-border-color: var(--dd-line);
+  --bs-btn-active-color: var(--dd-ink);
+  --bs-btn-active-bg: var(--dd-primary-50);
+  --bs-btn-active-border-color: var(--dd-primary-100);
+}
+
+.btn-danger {
+  --bs-btn-bg: var(--dd-danger);
+  --bs-btn-border-color: var(--dd-danger);
+  --bs-btn-hover-bg: var(--dd-danger-600);
+  --bs-btn-hover-border-color: var(--dd-danger-600);
+  --bs-btn-disabled-bg: var(--dd-danger);
+  --bs-btn-disabled-border-color: var(--dd-danger);
+}
+
+.btn-outline-danger {
+  --bs-btn-color: var(--dd-danger);
+  --bs-btn-border-color: var(--dd-danger);
+  --bs-btn-hover-bg: var(--dd-danger);
+  --bs-btn-hover-border-color: var(--dd-danger);
+  --bs-btn-active-bg: var(--dd-danger-600);
+  --bs-btn-active-border-color: var(--dd-danger-600);
+}
+
+/* White button for blue panels and the CTA banner */
+.btn-light {
+  --bs-btn-color: var(--dd-primary-700);
+  --bs-btn-bg: var(--dd-white);
+  --bs-btn-border-color: var(--dd-white);
+  --bs-btn-hover-color: var(--dd-primary-700);
+  --bs-btn-hover-bg: var(--dd-primary-50);
+  --bs-btn-hover-border-color: var(--dd-primary-50);
+  --bs-btn-active-bg: var(--dd-primary-100);
+  --bs-btn-active-border-color: var(--dd-primary-100);
+}
+
+/* Ghost: text-only button */
+.btn-ghost {
+  --bs-btn-color: var(--dd-primary);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: var(--dd-primary-600);
+  --bs-btn-hover-bg: var(--dd-primary-50);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-active-color: var(--dd-primary-700);
+  --bs-btn-active-bg: var(--dd-primary-100);
+  --bs-btn-active-border-color: transparent;
+}
+
+.btn-link {
+  --bs-btn-color: var(--dd-primary);
+  --bs-btn-hover-color: var(--dd-primary-600);
+  --bs-btn-active-color: var(--dd-primary-700);
+}
+
+/* Bootstrap components that compile their colours in, recoloured to the brand */
+.form-control,
+.form-select {
+  min-height: 48px;
+  border-color: var(--dd-line);
+  border-radius: var(--dd-radius-sm);
+  color: var(--dd-ink);
+}
+
+.form-control-sm,
+.form-select-sm {
+  min-height: 38px;
+}
+
+textarea.form-control {
+  min-height: 0;
+}
+
+.form-control::placeholder {
+  color: var(--dd-muted);
+  opacity: 0.8;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--dd-primary);
+  box-shadow: 0 0 0 4px var(--dd-primary-100);
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: var(--dd-danger);
+}
+
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+  box-shadow: 0 0 0 4px var(--dd-danger-50);
+}
+
+.form-control.is-valid,
+.form-select.is-valid {
+  border-color: var(--dd-success);
+}
+
+.invalid-feedback {
+  color: var(--dd-danger);
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--dd-ink);
+}
+
+.form-check-input:checked {
+  background-color: var(--dd-primary);
+  border-color: var(--dd-primary);
+}
+
+.form-check-input:focus {
+  border-color: var(--dd-primary);
+  box-shadow: 0 0 0 4px var(--dd-primary-100);
+}
+
+.form-range::-webkit-slider-thumb {
+  background-color: var(--dd-primary);
+}
+
+.form-range::-moz-range-thumb {
+  background-color: var(--dd-primary);
+}
+
+.form-range::-webkit-slider-thumb:active {
+  background-color: var(--dd-primary-100);
+}
+
+.form-range::-moz-range-thumb:active {
+  background-color: var(--dd-primary-100);
+}
+
+.form-range:focus::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 1px var(--dd-white),
+    0 0 0 4px var(--dd-primary-100);
+}
+
+.form-range:focus::-moz-range-thumb {
+  box-shadow:
+    0 0 0 1px var(--dd-white),
+    0 0 0 4px var(--dd-primary-100);
+}
+
+.form-range::-webkit-slider-runnable-track {
+  background-color: var(--dd-primary-100);
+}
+
+.form-range::-moz-range-track {
+  background-color: var(--dd-primary-100);
+}
+
+.progress {
+  --bs-progress-bar-bg: var(--dd-primary);
+  --bs-progress-bg: var(--dd-primary-50);
+}
+
+.pagination {
+  --bs-pagination-color: var(--dd-body);
+  --bs-pagination-border-color: var(--dd-line);
+  --bs-pagination-hover-color: var(--dd-primary);
+  --bs-pagination-hover-bg: var(--dd-primary-50);
+  --bs-pagination-hover-border-color: var(--dd-primary-100);
+  --bs-pagination-focus-color: var(--dd-primary);
+  --bs-pagination-focus-bg: var(--dd-primary-50);
+  --bs-pagination-focus-box-shadow: 0 0 0 4px var(--dd-primary-100);
+  --bs-pagination-active-bg: var(--dd-primary);
+  --bs-pagination-active-border-color: var(--dd-primary);
+  --bs-pagination-disabled-color: var(--dd-muted);
+}
+
+.dropdown-menu {
+  --bs-dropdown-border-color: var(--dd-line);
+  --bs-dropdown-border-radius: var(--dd-radius-sm);
+  --bs-dropdown-link-color: var(--dd-body);
+  --bs-dropdown-link-hover-color: var(--dd-ink);
+  --bs-dropdown-link-hover-bg: var(--dd-primary-50);
+  --bs-dropdown-link-active-color: var(--dd-white);
+  --bs-dropdown-link-active-bg: var(--dd-primary);
+  --bs-dropdown-item-padding-y: 0.55rem;
+  box-shadow: var(--dd-shadow-lg);
+}
+
+.list-group {
+  --bs-list-group-border-color: var(--dd-line);
+  --bs-list-group-active-bg: var(--dd-primary);
+  --bs-list-group-active-border-color: var(--dd-primary);
+}
+
+.alert {
+  --bs-alert-border-radius: var(--dd-radius-sm);
+}
+
+.alert-info {
+  --bs-alert-color: var(--dd-primary-700);
+  --bs-alert-bg: var(--dd-primary-50);
+  --bs-alert-border-color: var(--dd-primary-100);
+  --bs-alert-link-color: var(--dd-primary-700);
+}
+
+.card {
+  --bs-card-border-color: var(--dd-line);
+  --bs-card-border-radius: var(--dd-radius);
+  --bs-card-inner-border-radius: calc(var(--dd-radius) - 1px);
+}
+
+.modal {
+  --bs-modal-border-radius: var(--dd-radius);
+  --bs-modal-border-color: var(--dd-line);
+}
+
+.modal-backdrop {
+  --bs-backdrop-bg: var(--dd-navy);
+  --bs-backdrop-opacity: 0.55;
+}
+
+.spinner-border {
+  color: var(--dd-primary);
+}
+
+/* ---------- 3. Base ---------- */
+html {
+  scroll-padding-top: calc(var(--dd-navbar-h) + 16px);
+}
 
 body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--dd-white);
+  font-family: var(--dd-font);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
 #app {
@@ -15,4 +387,542 @@ body {
 
 main {
   flex: 1;
+}
+
+@media (min-width: 1200px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl,
+  .container-xxl {
+    max-width: 1200px;
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  color: var(--dd-ink);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+h1,
+.h1 {
+  font-size: clamp(2.25rem, 1.4rem + 3.2vw, 3.6rem);
+  font-weight: 800;
+}
+
+h2,
+.h2 {
+  font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.2rem);
+  font-weight: 700;
+}
+
+h3,
+.h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+h4,
+.h4,
+h5,
+.h5 {
+  font-weight: 700;
+}
+
+small,
+.small {
+  font-size: 0.875rem;
+}
+
+a {
+  text-underline-offset: 0.18em;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Visible focus everywhere. Never remove it. Inputs use their own ring (above). */
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+[tabindex]:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--dd-primary-100);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--dd-primary);
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--dd-primary);
+}
+
+/* ---------- 4. Shared classes ---------- */
+
+/* Small uppercase label above a section title */
+.dd-eyebrow {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dd-primary);
+}
+
+/* Short blue bar under a centred section title */
+.dd-title-bar {
+  display: block;
+  width: 40px;
+  height: 3px;
+  margin: 0.85rem auto 0;
+  border-radius: var(--dd-radius-pill);
+  background: var(--dd-primary);
+}
+
+.dd-section {
+  padding-block: var(--dd-section-y);
+}
+
+.dd-section-surface {
+  background: var(--dd-surface);
+}
+
+.dd-section-head {
+  margin-bottom: 2rem;
+}
+
+.dd-lead {
+  font-size: 1.075rem;
+  color: var(--dd-muted);
+}
+
+/* Slim page header (Browse, Profile, Liked, Sell...) */
+.dd-page-header {
+  padding-block: 2rem 2.25rem;
+  background: var(--dd-surface);
+  border-bottom: 1px solid var(--dd-line);
+}
+
+.dd-page-title {
+  margin: 0;
+  font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.4rem);
+  font-weight: 800;
+}
+
+.dd-breadcrumb {
+  --bs-breadcrumb-divider-color: var(--dd-muted);
+  --bs-breadcrumb-item-active-color: var(--dd-muted);
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.dd-breadcrumb a {
+  text-decoration: none;
+}
+
+/* White card */
+.dd-card {
+  background: var(--dd-white);
+  border: 1px solid var(--dd-line);
+  border-radius: var(--dd-radius);
+  box-shadow: var(--dd-shadow-sm);
+}
+
+.dd-card-body {
+  padding: 1.5rem;
+}
+
+@media (max-width: 575.98px) {
+  .dd-card-body {
+    padding: 1.15rem;
+  }
+}
+
+/* Clickable card lift */
+.dd-card-hover {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dd-card-hover:hover,
+  .dd-card-hover:focus-within {
+    transform: translateY(-3px);
+    box-shadow: var(--dd-shadow-lg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-card-hover:hover,
+  .dd-card-hover:focus-within {
+    box-shadow: var(--dd-shadow-lg);
+  }
+}
+
+/* Soft grey feature card with a line icon */
+.dd-feature-card {
+  height: 100%;
+  padding: 1.5rem;
+  border-radius: var(--dd-radius);
+  background: var(--dd-surface);
+}
+
+.dd-feature-card .dd-feature-icon {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  color: var(--dd-primary);
+}
+
+.dd-feature-card h3 {
+  margin-bottom: 0.4rem;
+  font-size: 1.05rem;
+}
+
+.dd-feature-card p {
+  margin: 0;
+  font-size: 0.925rem;
+  color: var(--dd-muted);
+}
+
+/* Large rounded panels */
+.dd-panel {
+  padding: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+  border-radius: var(--dd-radius-lg);
+  background: var(--dd-white);
+  border: 1px solid var(--dd-line);
+}
+
+.dd-panel-blue {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+  border-radius: var(--dd-radius-lg);
+  background: var(--dd-gradient);
+  color: var(--dd-white);
+}
+
+.dd-panel-blue h2,
+.dd-panel-blue h3,
+.dd-panel-blue .dd-eyebrow {
+  color: var(--dd-white);
+}
+
+.dd-panel-tint {
+  padding: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+  border-radius: var(--dd-radius-lg);
+  background: var(--dd-primary-50);
+  border: 1px solid var(--dd-primary-100);
+}
+
+/* Frosted glass, only on top of photos */
+.dd-glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* Button with a small arrow box */
+.dd-btn-arrow {
+  padding-right: 0.45rem;
+}
+
+.dd-btn-arrow .dd-arrow-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--dd-white-15);
+  transition: transform 0.2s ease;
+}
+
+.btn-light.dd-btn-arrow .dd-arrow-box,
+.btn-outline-primary.dd-btn-arrow .dd-arrow-box {
+  background: var(--dd-primary-50);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dd-btn-arrow:hover .dd-arrow-box,
+  .dd-btn-arrow:focus-visible .dd-arrow-box {
+    transform: translateX(3px);
+  }
+}
+
+/* Text link with an arrow, e.g. "View all cars ->" */
+.dd-link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dd-link-arrow:hover {
+  text-decoration: underline;
+}
+
+/* Outline pill chips (makes, active filters) */
+.dd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--dd-line);
+  border-radius: var(--dd-radius-pill);
+  background: var(--dd-white);
+  color: var(--dd-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+a.dd-chip:hover,
+button.dd-chip:hover {
+  border-color: var(--dd-primary);
+  color: var(--dd-primary);
+  background: var(--dd-primary-50);
+}
+
+.dd-chip-active {
+  border-color: var(--dd-primary-100);
+  background: var(--dd-primary-50);
+  color: var(--dd-primary-700);
+}
+
+/* Icon in a tinted circle */
+.dd-icon-circle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--dd-primary-50);
+  color: var(--dd-primary);
+}
+
+/* Initials avatar */
+.dd-avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--dd-primary-50);
+  color: var(--dd-primary-700);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.dd-price {
+  font-weight: 800;
+  color: var(--dd-primary);
+}
+
+/* Status badges: text + colour, never colour alone */
+.dd-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--dd-radius-pill);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.dd-status-available {
+  background: var(--dd-success-50);
+  color: var(--dd-success);
+}
+
+.dd-status-reserved {
+  background: var(--dd-warning-50);
+  color: var(--dd-warning-text);
+}
+
+.dd-status-sold {
+  background: var(--dd-surface);
+  color: var(--dd-muted);
+  border: 1px solid var(--dd-line);
+}
+
+/* Stats band: icon + big number + label, dividers on desktop */
+.dd-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border: 1px solid var(--dd-line);
+  border-radius: var(--dd-radius);
+  background: var(--dd-white);
+  box-shadow: var(--dd-shadow-sm);
+}
+
+.dd-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.dd-stat-value {
+  display: block;
+  font-size: clamp(1.35rem, 1.1rem + 0.8vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--dd-ink);
+}
+
+.dd-stat-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--dd-muted);
+}
+
+@media (min-width: 992px) {
+  .dd-stats {
+    grid-template-columns: repeat(var(--dd-stats-cols, 4), minmax(0, 1fr));
+    gap: 0;
+    padding: 1.75rem 0;
+  }
+
+  .dd-stat {
+    padding-inline: 1.75rem;
+  }
+
+  .dd-stat + .dd-stat {
+    border-left: 1px solid var(--dd-line);
+  }
+}
+
+/* Empty state */
+.dd-empty {
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--dd-primary-100);
+  border-radius: var(--dd-radius);
+  background: var(--dd-surface);
+  text-align: center;
+}
+
+.dd-empty .dd-icon-circle {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1rem;
+}
+
+.dd-empty h2,
+.dd-empty h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.4rem;
+}
+
+.dd-empty p {
+  color: var(--dd-muted);
+}
+
+/* Skeleton loading boxes */
+.dd-skeleton {
+  border-radius: var(--dd-radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--dd-surface) 25%,
+    var(--dd-primary-50) 50%,
+    var(--dd-surface) 75%
+  );
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dd-skeleton {
+    animation: dd-shimmer 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes dd-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Sticky helper for sidebars and the price card (sits under the navbar) */
+.dd-sticky {
+  position: sticky;
+  top: calc(var(--dd-navbar-h) + 16px);
+}
+
+/* Vertical timeline with dots */
+.dd-timeline {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dd-timeline li {
+  position: relative;
+  padding: 0 0 1.25rem 1.75rem;
+}
+
+.dd-timeline li:last-child {
+  padding-bottom: 0;
+}
+
+.dd-timeline li::before {
+  content: '';
+  position: absolute;
+  top: 0.45rem;
+  left: 0;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--dd-primary);
+  border-radius: 50%;
+  background: var(--dd-white);
+}
+
+.dd-timeline li::after {
+  content: '';
+  position: absolute;
+  top: 1.25rem;
+  bottom: -0.15rem;
+  left: 5px;
+  width: 1px;
+  background: var(--dd-primary-100);
+}
+
+.dd-timeline li:last-child::after {
+  display: none;
+}
+
+.dd-timeline li:last-child::before {
+  background: var(--dd-primary);
 }

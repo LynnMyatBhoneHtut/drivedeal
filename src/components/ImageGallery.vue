@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { imageUrl } from '../services/api'
+import AppIcon from './AppIcon.vue'
 
 const props = defineProps({
   images: {
@@ -87,11 +88,11 @@ v-if="
       <!-- Navigation arrows -->
       <template v-if="availableImages.length > 1">
         <button type="button" class="gallery-arrow previous" aria-label="Previous photo" @click="previousImage">
-          &#10094;
+          <AppIcon name="chevron-left" :size="22" />
         </button>
 
         <button type="button" class="gallery-arrow next" aria-label="Next photo" @click="nextImage">
-          &#10095;
+          <AppIcon name="chevron-right" :size="22" />
         </button>
       </template>
 
@@ -121,8 +122,8 @@ v-if="!failedImages[image.image_path]" :src="imageUrl(image.image_path)" :alt="`
 .main-image {
   position: relative;
   height: 380px;
-  background: #f1f3f5;
-  border-radius: 14px;
+  background: var(--dd-surface);
+  border-radius: var(--dd-radius);
   overflow: hidden;
 }
 
@@ -139,7 +140,7 @@ v-if="!failedImages[image.image_path]" :src="imageUrl(image.image_path)" :alt="`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #6c757d;
+  color: var(--dd-muted);
   text-align: center;
   padding: 20px;
 }
@@ -148,8 +149,8 @@ v-if="!failedImages[image.image_path]" :src="imageUrl(image.image_path)" :alt="`
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(28, 34, 40, 0.85);
-  color: white;
+  background: var(--dd-overlay);
+  color: var(--dd-white);
   border: none;
   border-radius: 50%;
   width: 42px;
@@ -159,13 +160,7 @@ v-if="!failedImages[image.image_path]" :src="imageUrl(image.image_path)" :alt="`
 }
 
 .gallery-arrow:hover {
-  background: #c2410c;
-}
-
-.gallery-arrow:focus-visible,
-.thumbnail-button:focus-visible {
-  outline: 3px solid #c2410c;
-  outline-offset: 3px;
+  background: var(--dd-primary);
 }
 
 .previous {
@@ -180,10 +175,10 @@ v-if="!failedImages[image.image_path]" :src="imageUrl(image.image_path)" :alt="`
   position: absolute;
   bottom: 15px;
   right: 15px;
-  background: rgba(28, 34, 40, 0.85);
-  color: white;
+  background: var(--dd-overlay);
+  color: var(--dd-white);
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: var(--dd-radius-pill);
   font-size: 13px;
 }
 
@@ -201,13 +196,13 @@ v-if="!failedImages[image.image_path]" :src="imageUrl(image.image_path)" :alt="`
   border: 2px solid transparent;
   border-radius: 8px;
   overflow: hidden;
-  background: #f1f3f5;
-  color: #6c757d;
+  background: var(--dd-surface);
+  color: var(--dd-muted);
   font-size: 11px;
 }
 
 .thumbnail-button.selected {
-  border-color: #c2410c;
+  border-color: var(--dd-primary);
 }
 
 .thumbnail-button img {

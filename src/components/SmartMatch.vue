@@ -188,7 +188,7 @@ class="d-flex flex-wrap justify-content-between
         </p>
       </div>
 
-      <button type="button" class="btn btn-outline-dark" @click="resetPreferences">
+      <button type="button" class="btn btn-outline-primary" @click="resetPreferences">
         Reset Preferences
       </button>
     </div>
@@ -317,7 +317,7 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
             </p>
 
             <p class="text-muted small">
-              {{ car.year }} ·
+              {{ car.year }} Â·
               {{ formatNumber(car.mileage_km) }} km
             </p>
 
@@ -345,7 +345,7 @@ v-for="factor in getScoreDetails(car)" :key="factor.key"
                 <div class="small">
                   <strong>{{ factor.label }}</strong>
                   <div class="text-muted">
-                    {{ factor.score }}/100 × {{ factor.weight }}% importance
+                    {{ factor.score }}/100 Ã— {{ factor.weight }}% importance
                   </div>
                 </div>
 
@@ -368,7 +368,7 @@ v-for="factor in getScoreDetails(car)" :key="factor.key"
 :to="{
               name: 'car-detail',
               params: { id: car.listing_id }
-            }" class="btn btn-outline-dark w-100">
+            }" class="btn btn-outline-primary w-100">
               View Details
             </router-link>
           </article>
@@ -402,7 +402,7 @@ v-for="factor in getScoreDetails(car)" :key="factor.key"
       </p>
 
       <div class="d-flex flex-wrap gap-2 mb-3">
-        <span v-for="car in comparisonCars" :key="car.listing_id" class="badge text-bg-light border text-dark">
+        <span v-for="car in comparisonCars" :key="car.listing_id" class="dd-chip dd-chip-active">
           {{ car.make }} {{ car.model }}
         </span>
       </div>
@@ -448,77 +448,46 @@ v-if="activeWeightTotal > 0" :cars="comparisonCars"
 
 <style scoped>
 .smart-match {
-  background: #faf8f5;
-  border: 1px solid #e9e5e1;
-  border-radius: 16px;
+  background: var(--dd-primary-50);
+  border: 1px solid var(--dd-primary-100);
+  border-radius: var(--dd-radius);
 }
 
 .section-label {
-  color: #c2410c;
-  font-size: 12px;
+  color: var(--dd-primary);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.12em;
 }
 
 .match-value {
-  color: #c2410c;
-  font-size: 18px;
+  color: var(--dd-primary);
+  font-size: 1.125rem;
 }
 
 .weights-panel {
-  background: white;
-  border: 1px solid #e9e5e1;
+  background: var(--dd-white);
+  border: 1px solid var(--dd-line);
   border-radius: 12px;
 }
 
 .recommendation-card {
-  background: white;
-  border: 1px solid #e9e5e1;
+  background: var(--dd-white);
+  border: 1px solid var(--dd-line);
   border-radius: 12px;
 }
 
 .score-label {
-  background: #fff0e6;
-  color: #9a3412;
+  background: var(--dd-primary-50);
+  color: var(--dd-primary-700);
   border-radius: 8px;
   padding: 6px 10px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .match-progress {
-  background: #c2410c;
-}
-
-/* Copper slider controls */
-.form-range::-webkit-slider-thumb {
-  background-color: #c2410c;
-}
-
-.form-range::-moz-range-thumb {
-  background-color: #c2410c;
-  border-color: #c2410c;
-}
-
-.form-range:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 0.25rem rgba(194, 65, 12, 0.2);
-}
-
-.form-range:focus-visible,
-.form-select:focus-visible {
-  outline: 2px solid #c2410c;
-  outline-offset: 2px;
-}
-
-/* Copper comparison checkboxes */
-.form-check-input:checked {
-  background-color: #c2410c;
-  border-color: #c2410c;
-}
-
-.form-check-input:focus {
-  border-color: #c2410c;
-  box-shadow: 0 0 0 0.25rem rgba(194, 65, 12, 0.2);
+  background: var(--dd-primary);
 }
 </style>

@@ -190,7 +190,7 @@ async function sendInquiry() {
                 Please log in to contact the seller.
               </p>
 
-              <router-link :to="{ name: 'login' }" class="btn btn-dark w-100">
+              <router-link :to="{ name: 'login' }" class="btn btn-primary w-100">
                 Log In to Enquire
               </router-link>
             </div>
@@ -219,7 +219,7 @@ id="sellerMessage" v-model.trim="message" class="form-control" rows="5" minlengt
                 {{ errorMessage }}
               </div>
 
-              <button type="submit" class="btn btn-dark w-100" :disabled="isSending">
+              <button type="submit" class="btn btn-primary w-100" :disabled="isSending">
                 {{ isSending ? 'Sending...' : 'Send Enquiry' }}
               </button>
             </form>
@@ -240,7 +240,7 @@ id="sellerMessage" v-model.trim="message" class="form-control" rows="5" minlengt
 
 <style scoped>
 .back-link {
-  color: #9a3412;
+  color: var(--dd-primary);
   text-decoration: none;
   font-weight: 600;
 }
@@ -252,18 +252,19 @@ id="sellerMessage" v-model.trim="message" class="form-control" rows="5" minlengt
 .details-card,
 .price-card {
   padding: 30px;
-  background: white;
-  border: 1px solid #e9e5e1;
-  border-radius: 14px;
+  background: var(--dd-white);
+  border: 1px solid var(--dd-line);
+  border-radius: var(--dd-radius);
+  box-shadow: var(--dd-shadow-sm);
 }
 
 .detail-label {
-  color: #6c757d;
+  color: var(--dd-muted);
   margin-bottom: 5px;
 }
 
 .car-price {
-  color: #c2410c;
+  color: var(--dd-primary);
   font-size: clamp(1.6rem, 3vw, 2.2rem);
   font-weight: 800;
 }

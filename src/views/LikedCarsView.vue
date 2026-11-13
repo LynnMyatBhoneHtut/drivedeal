@@ -6,6 +6,7 @@
 import { computed, ref, watch } from 'vue'
 import CarCard from '../components/CarCard.vue'
 import LikeButton from '../components/LikeButton.vue'
+import AppIcon from '../components/AppIcon.vue'
 import { apiGet } from '../services/api'
 import { currentUser } from '../services/auth'
 
@@ -115,9 +116,9 @@ function onLikeChange(car, { liked, likes }) {
         </button>
       </div>
 
-      <div v-else-if="!cars.length" class="text-center border rounded p-5 bg-light">
-        <p class="display-6 mb-2" aria-hidden="true">&#9825;</p>
-        <p class="lead mb-3">You haven't liked any cars yet.</p>
+      <div v-else-if="!cars.length" class="dd-empty">
+        <span class="dd-icon-circle"><AppIcon name="heart" :size="28" /></span>
+        <h2>No liked cars yet</h2>
         <p class="text-muted">Tap the heart on a car you're interested in to save it here.</p>
         <router-link :to="{ name: 'cars' }" class="btn btn-primary">Browse cars</router-link>
       </div>
@@ -128,8 +129,8 @@ function onLikeChange(car, { liked, likes }) {
           <div class="d-flex justify-content-between align-items-center mt-2">
             <span
               v-if="car.status !== 'available'"
-              class="badge"
-              :class="car.status === 'sold' ? 'bg-secondary' : 'bg-warning text-dark'"
+              class="dd-status"
+              :class="car.status === 'sold' ? 'dd-status-sold' : 'dd-status-reserved'"
             >
               {{ car.status === 'sold' ? 'Sold' : 'Reserved' }}
             </span>

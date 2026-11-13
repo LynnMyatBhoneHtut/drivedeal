@@ -11,11 +11,11 @@
       </p>
 
       <div class="d-flex flex-wrap justify-content-center gap-3">
-        <router-link :to="{ name: 'home' }" class="btn btn-dark px-4">
+        <router-link :to="{ name: 'home' }" class="btn btn-primary px-4">
           Back to Home
         </router-link>
 
-        <router-link :to="{ name: 'cars' }" class="btn btn-outline-dark px-4">
+        <router-link :to="{ name: 'cars' }" class="btn btn-outline-primary px-4">
           Browse Cars
         </router-link>
       </div>
@@ -40,6 +40,6 @@
   font-size: clamp(5rem, 12vw, 9rem);
   font-weight: 800;
   line-height: 1.1;
-  color: #212529;
+  color: var(--dd-primary);
 }
 </style>
