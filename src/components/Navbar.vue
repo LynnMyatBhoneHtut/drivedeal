@@ -8,6 +8,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppIcon from './AppIcon.vue'
 import logoUrl from '../assets/brand/logo.svg'
 import { currentUser, logout } from '../services/auth'
+import NotificationBell from './NotificationBell.vue' // Yati - price-drop alerts (D/HD)
 
 const route = useRoute()
 const router = useRouter()
@@ -69,6 +70,13 @@ function handleLogout() {
         <router-link class="navbar-brand me-lg-4 py-0" :to="{ name: 'home' }">
           <img :src="logoUrl" alt="DriveDeal" class="dd-logo" width="195" height="28" />
         </router-link>
+
+        <!-- Yati - price-drop alerts bell. Outside the mobile menu so the unread count is always
+             visible; order-lg-last puts it at the far right on wider screens. -->
+        <NotificationBell
+          v-if="currentUser"
+          class="dd-bell ms-auto me-1 ms-lg-1 me-lg-0 order-lg-last"
+        />
 
         <button
           class="dd-toggler d-lg-none"
@@ -153,6 +161,11 @@ function handleLogout() {
                 <li>
                   <router-link class="dropdown-item" :to="{ name: 'liked' }">
                     <AppIcon name="heart" :size="18" /> Liked cars
+                  </router-link>
+                </li>
+                <li>
+                  <router-link class="dropdown-item" :to="{ name: 'watchlist' }">
+                    <AppIcon name="eye" :size="18" /> Watchlist
                   </router-link>
                 </li>
                 <li>

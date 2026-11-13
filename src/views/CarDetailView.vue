@@ -5,7 +5,11 @@ import { currentUser } from '../services/auth'
 import ImageGallery from '../components/ImageGallery.vue'
 import LikeButton from '../components/LikeButton.vue'
 import AppIcon from '../components/AppIcon.vue'
+// Lynn - make an offer & negotiate (individual feature)
 import MakeOfferPanel from '../components/MakeOfferPanel.vue'
+// Yati - price-drop watchlist (D/HD)
+import WatchButton from '../components/WatchButton.vue'
+import PriceHistoryChart from '../components/PriceHistoryChart.vue'
 
 const props = defineProps({
   id: {
@@ -224,6 +228,13 @@ const statusLabel = computed(() => {
             <p v-if="car.description" class="description mb-0">{{ car.description }}</p>
             <p v-else class="text-muted mb-0">The seller hasn't added a description yet.</p>
           </div>
+
+          <!-- Yati - price history chart (D/HD) -->
+          <PriceHistoryChart
+            :listing-id="car.listing_id"
+            :current-price="Number(car.price)"
+            class="dd-card dd-card-body mt-4"
+          />
         </div>
 
         <!-- Price, seller and contact -->
@@ -236,6 +247,14 @@ const statusLabel = computed(() => {
                 :listing-id="car.listing_id"
                 :likes="Number(car.likes ?? 0)"
                 :liked="Boolean(car.liked)"
+              />
+
+              <!-- Yati - watch this car's price (D/HD) -->
+              <WatchButton
+                :listing-id="car.listing_id"
+                :price="Number(car.price)"
+                :seller-id="Number(car.seller_id)"
+                class="mt-3"
               />
             </div>
 
