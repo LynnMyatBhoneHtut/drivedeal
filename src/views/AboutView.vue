@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { apiPost } from '../services/api'
+import AppIcon from '../components/AppIcon.vue'
 
 const form = reactive({
   name: '',
@@ -35,152 +36,164 @@ async function submitForm() {
     isSubmitting.value = false
   }
 }
+
+const missions = [
+  {
+    icon: 'search',
+    title: 'Explore cars',
+    text: 'Browse listings with search, filters and Smart Match recommendations.'
+  },
+  {
+    icon: 'eye',
+    title: 'See the details',
+    text: 'Photos, specifications and the seller’s own description on every car.'
+  },
+  {
+    icon: 'message',
+    title: 'Talk to the seller',
+    text: 'Send an enquiry straight to the owner, with no middlemen.'
+  },
+  {
+    icon: 'tag',
+    title: 'Sell for free',
+    text: 'List your own car in minutes and manage enquiries in one place.'
+  }
+]
+
+const nextSteps = [
+  { title: 'Your message is saved', text: 'It reaches the DriveDeal team straight away.' },
+  { title: 'We read every message', text: 'Questions, feedback and bug reports all help.' },
+  { title: 'We reply if needed', text: 'Using the email address you give us.' }
+]
 </script>
 
 <template>
   <div>
-    <!-- Page heading -->
-    <section class="about-header text-white py-5">
+    <!-- Small hero -->
+    <section class="about-hero">
       <div class="container">
-        <h1 class="fw-bold mb-3">About DriveDeal</h1>
-        <p class="mb-0">
-          Making it easier to explore, buy and sell cars.
-        </p>
+        <div class="about-hero-inner">
+          <span class="dd-eyebrow">About DriveDeal</span>
+          <h1 class="about-title">A simpler way to buy and sell cars</h1>
+          <p class="dd-lead mb-0">
+            DriveDeal is a car marketplace that connects buyers and sellers directly. Browse cars,
+            compare them, and talk to the owner, all in one place.
+          </p>
+        </div>
       </div>
     </section>
 
-    <!-- About section -->
-    <section class="container py-5">
-      <div class="row align-items-center g-4 g-lg-5">
-        <div class="col-12 col-lg-7">
-          <p class="section-label">WHO WE ARE</p>
-
-          <h2 class="fw-bold mb-4">
-            A Simpler Way to Find Your Next Car
-          </h2>
-
-          <p class="text-muted">
-            DriveDeal is a car marketplace designed to connect
-            buyers and sellers through a convenient online platform.
-          </p>
-
-          <p class="text-muted">
-            Our platform allows users to browse car listings,
-            explore vehicle information and contact sellers
-            directly to learn more about available cars.
-          </p>
-
-          <p class="text-muted mb-0">
-            Whether you're searching for your next vehicle
-            or planning to sell your current car,
-            DriveDeal aims to make the process straightforward.
-          </p>
+    <!-- Mission -->
+    <section class="dd-section pt-4 pt-lg-5">
+      <div class="container">
+        <div class="dd-section-head">
+          <span class="dd-eyebrow">What you can do</span>
+          <h2 class="mb-0">Everything you need for your next car</h2>
         </div>
-
-        <div class="col-12 col-lg-5">
-          <div class="about-card">
-            <h3 class="h4 fw-bold mb-4">
-              What You Can Do
-            </h3>
-
-            <div class="feature-item">
-              <span class="feature-icon" aria-hidden="true">Ã¢Å“â€œ</span>
-              <div>
-                <strong>Explore Cars</strong>
-                <p class="text-muted mb-0">
-                  Browse listings with useful search and filters.
-                </p>
-              </div>
-            </div>
-
-            <div class="feature-item">
-              <span class="feature-icon" aria-hidden="true">Ã¢Å“â€œ</span>
-              <div>
-                <strong>View Vehicle Details</strong>
-                <p class="text-muted mb-0">
-                  Check car specifications and information.
-                </p>
-              </div>
-            </div>
-
-            <div class="feature-item">
-              <span class="feature-icon" aria-hidden="true">Ã¢Å“â€œ</span>
-              <div>
-                <strong>Connect With Sellers</strong>
-                <p class="text-muted mb-0">
-                  Send enquiries about cars you're interested in.
-                </p>
-              </div>
+        <div class="row g-3 g-lg-4">
+          <div v-for="item in missions" :key="item.title" class="col-12 col-sm-6 col-lg-3">
+            <div class="dd-feature-card">
+              <span class="dd-feature-icon">
+                <AppIcon :name="item.icon" :size="28" :stroke-width="1.5" />
+              </span>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.text }}</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Contact section -->
-    <section class="contact-section py-5">
+    <!-- Contact -->
+    <section id="contact" class="dd-section dd-section-surface">
       <div class="container">
         <div class="row g-4 g-lg-5">
           <div class="col-12 col-lg-5">
-            <p class="section-label">GET IN TOUCH</p>
-
-            <h2 class="fw-bold mb-3">
-              Contact Us
-            </h2>
-
-            <p class="text-muted">
-              Have a question or feedback about DriveDeal?
-              Fill in the form and send us a message.
+            <span class="dd-eyebrow">Get in touch</span>
+            <h2 class="mb-3">Contact us</h2>
+            <p class="text-muted mb-4">
+              Have a question or feedback about DriveDeal? Fill in the form and send us a message.
             </p>
+
+            <div class="dd-card dd-card-body">
+              <h3 class="h3 mb-3">What happens next</h3>
+              <ol class="dd-timeline">
+                <li v-for="step in nextSteps" :key="step.title">
+                  <p class="fw-bold mb-0 text-body-emphasis">{{ step.title }}</p>
+                  <p class="small text-muted mb-0">{{ step.text }}</p>
+                </li>
+              </ol>
+            </div>
           </div>
 
           <div class="col-12 col-lg-7">
-            <div class="contact-card">
-              <h3 class="h4 fw-bold mb-4">
-                Send Us a Message
+            <div class="dd-card contact-card">
+              <h3 class="h3 mb-4 d-flex align-items-center gap-2">
+                <AppIcon name="mail" :size="22" /> Send us a message
               </h3>
 
               <form @submit.prevent="submitForm">
-                <div class="mb-3">
-                  <label for="contactName" class="form-label">
-                    Full Name
-                  </label>
+                <div class="row g-3">
+                  <div class="col-12 col-md-6">
+                    <label for="contactName" class="form-label">Full name</label>
+                    <input
+                      id="contactName"
+                      v-model.trim="form.name"
+                      type="text"
+                      class="form-control"
+                      placeholder="Your full name"
+                      maxlength="100"
+                      autocomplete="name"
+                      required
+                    />
+                  </div>
 
-                  <input
-id="contactName" v-model.trim="form.name" type="text" class="form-control"
-                    placeholder="Enter your full name" maxlength="100" required />
+                  <div class="col-12 col-md-6">
+                    <label for="contactEmail" class="form-label">Email address</label>
+                    <input
+                      id="contactEmail"
+                      v-model.trim="form.email"
+                      type="email"
+                      class="form-control"
+                      placeholder="you@example.com"
+                      maxlength="150"
+                      autocomplete="email"
+                      required
+                    />
+                  </div>
+
+                  <div class="col-12">
+                    <label for="contactMessage" class="form-label">Message</label>
+                    <textarea
+                      id="contactMessage"
+                      v-model.trim="form.message"
+                      class="form-control"
+                      rows="5"
+                      minlength="10"
+                      maxlength="2000"
+                      placeholder="Write your message here..."
+                      required
+                    ></textarea>
+                    <div class="form-text">At least 10 characters.</div>
+                  </div>
                 </div>
 
-                <div class="mb-3">
-                  <label for="contactEmail" class="form-label">
-                    Email Address
-                  </label>
-
-                  <input
-id="contactEmail" v-model.trim="form.email" type="email" class="form-control"
-                    placeholder="Enter your email" maxlength="150" required />
-                </div>
-
-                <div class="mb-4">
-                  <label for="contactMessage" class="form-label">
-                    Message
-                  </label>
-
-                  <textarea
-id="contactMessage" v-model.trim="form.message" class="form-control" rows="5" minlength="10"
-                    maxlength="2000" placeholder="Write your message here..." required></textarea>
-                </div>
-
-                <div v-if="successMessage" class="alert alert-success" role="status">
+                <div v-if="successMessage" class="alert alert-success mt-3 mb-0" role="status">
                   {{ successMessage }}
                 </div>
 
-                <div v-if="errorMessage" class="alert alert-danger" role="alert">
+                <div v-if="errorMessage" class="alert alert-danger mt-3 mb-0" role="alert">
                   {{ errorMessage }}
                 </div>
 
-                <button type="submit" class="btn btn-primary px-4" :disabled="isSubmitting">
-                  {{ isSubmitting ? 'Sending...' : 'Send Message' }}
+                <button type="submit" class="btn btn-primary mt-4" :disabled="isSubmitting">
+                  <span
+                    v-if="isSubmitting"
+                    class="spinner-border spinner-border-sm"
+                    aria-hidden="true"
+                  ></span>
+                  <AppIcon v-else name="arrow-right" :size="18" />
+                  {{ isSubmitting ? 'Sending...' : 'Send message' }}
                 </button>
               </form>
             </div>
@@ -192,70 +205,21 @@ id="contactMessage" v-model.trim="form.message" class="form-control" rows="5" mi
 </template>
 
 <style scoped>
-.about-header {
-  background: var(--dd-gradient);
+.about-hero {
+  padding: clamp(2.5rem, 1.5rem + 4vw, 5rem) 0 clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  background: var(--dd-hero-bg);
 }
 
-.about-header h1 {
-  color: var(--dd-white);
+.about-hero-inner {
+  max-width: 720px;
 }
 
-.about-header p {
-  color: var(--dd-white-70);
-}
-
-.section-label {
-  color: var(--dd-primary);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-.about-card {
-  background: var(--dd-surface);
-  border-radius: var(--dd-radius);
-  padding: 30px;
-}
-
-.feature-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 15px;
-  margin-bottom: 22px;
-}
-
-.feature-item:last-child {
-  margin-bottom: 0;
-}
-
-.feature-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--dd-primary);
-  color: var(--dd-white);
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-}
-
-.contact-section {
-  background: var(--dd-surface);
+.about-title {
+  margin-bottom: 1rem;
+  font-size: clamp(2rem, 1.3rem + 2.6vw, 3rem);
 }
 
 .contact-card {
-  background: var(--dd-white);
-  border: 1px solid var(--dd-line);
-  border-radius: var(--dd-radius);
-  box-shadow: var(--dd-shadow-sm);
-  padding: 35px;
-}
-
-@media (max-width: 767px) {
-  .contact-card,
-  .about-card {
-    padding: 22px;
-  }
+  padding: clamp(1.25rem, 1rem + 1.5vw, 2.25rem);
 }
 </style>
