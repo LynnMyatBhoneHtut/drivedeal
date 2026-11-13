@@ -4,6 +4,7 @@
 // Yati: the guest vs logged-in links below already use v-if on currentUser.
 import { useRouter } from 'vue-router'
 import { currentUser, logout } from '../services/auth'
+import NotificationBell from './NotificationBell.vue' // Yati - price alerts (D/HD)
 
 const router = useRouter()
 
@@ -17,6 +18,10 @@ function handleLogout() {
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
       <router-link class="navbar-brand" :to="{ name: 'home' }">DriveDeal</router-link>
+
+      <!-- Yati - price-drop alerts bell. Outside the collapse so it shows on phones too;
+           order-lg-last moves it to the far right on wider screens. -->
+      <NotificationBell v-if="currentUser" class="ms-auto me-2 ms-lg-2 me-lg-0 order-lg-last" />
       <button
         class="navbar-toggler"
         type="button"
@@ -59,6 +64,9 @@ function handleLogout() {
           </li>
           <li class="nav-item">
             <router-link class="nav-link" :to="{ name: 'liked' }">Liked</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link class="nav-link" :to="{ name: 'watchlist' }">Watchlist</router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link" :to="{ name: 'profile' }">

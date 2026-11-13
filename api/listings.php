@@ -368,6 +368,11 @@ function update_listing() {
   $stmt->execute();
   $stmt->close();
 
+  // Yati - watchlist (D/HD): if the price changed, save it to price_history and alert
+  // everyone watching this car. See api/price_alerts.php.
+  require_once __DIR__ . '/price_alerts.php';
+  record_price_change($listingId, $existing['price'], $car['price']);
+
   reply(array('ok' => true));
 }
 

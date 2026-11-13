@@ -4,6 +4,9 @@ import { apiGet, apiPost } from '../services/api'
 import { currentUser } from '../services/auth'
 import ImageGallery from '../components/ImageGallery.vue'
 import LikeButton from '../components/LikeButton.vue'
+// Yati - price-drop watchlist (D/HD)
+import WatchButton from '../components/WatchButton.vue'
+import PriceHistoryChart from '../components/PriceHistoryChart.vue'
 
 const props = defineProps({
   id: {
@@ -156,6 +159,9 @@ async function sendInquiry() {
               </div>
             </div>
           </div>
+
+          <!-- Yati - price history chart (D/HD) -->
+          <PriceHistoryChart :listing-id="car.listing_id" :current-price="Number(car.price)" class="mt-4" />
         </div>
 
         <!-- Price and seller panel -->
@@ -171,6 +177,14 @@ async function sendInquiry() {
             <div class="mb-3">
               <LikeButton :listing-id="car.listing_id" :likes="Number(car.likes ?? 0)" :liked="Boolean(car.liked)" />
             </div>
+
+            <!-- Yati - watch this car's price (D/HD) -->
+            <WatchButton
+              :listing-id="car.listing_id"
+              :price="Number(car.price)"
+              :seller-id="Number(car.seller_id)"
+              class="mb-3"
+            />
 
             <hr />
 
