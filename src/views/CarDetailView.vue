@@ -5,6 +5,7 @@ import { currentUser } from '../services/auth'
 import ImageGallery from '../components/ImageGallery.vue'
 import LikeButton from '../components/LikeButton.vue'
 import AppIcon from '../components/AppIcon.vue'
+import MakeOfferPanel from '../components/MakeOfferPanel.vue'
 
 const props = defineProps({
   id: {
@@ -251,6 +252,9 @@ const statusLabel = computed(() => {
               </div>
             </div>
 
+            <!-- Make an offer & negotiate (Lynn's individual feature) -->
+            <MakeOfferPanel :car="car" class="mb-3" @car-status="car.status = $event" />
+
             <div class="dd-card dd-card-body">
               <h2 class="h3 mb-1 d-flex align-items-center gap-2">
                 <AppIcon name="message" :size="20" /> Contact seller
@@ -392,12 +396,5 @@ const statusLabel = computed(() => {
 
 .min-w-0 {
   min-width: 0;
-}
-
-@media (min-width: 992px) {
-  .detail-side {
-    position: sticky;
-    top: calc(var(--dd-navbar-h) + 16px);
-  }
 }
 </style>
