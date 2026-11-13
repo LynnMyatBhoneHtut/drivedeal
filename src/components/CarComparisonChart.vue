@@ -56,19 +56,11 @@ const criteria = computed(() => {
   return items
 })
 
-// Brand colours come from the design tokens in main.css (--dd-chart-1..3)
-function readToken(name, fallback) {
-  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-  return value || fallback
-}
-
-const chartColors = ['--dd-chart-1', '--dd-chart-2', '--dd-chart-3'].map((name) =>
-  readToken(name, 'currentColor')
-)
-
-Chart.defaults.font.family = readToken('--dd-font', 'system-ui, sans-serif')
-Chart.defaults.color = readToken('--dd-muted', 'gray')
-Chart.defaults.borderColor = readToken('--dd-line', 'lightgray')
+const chartColors = [
+  '#c2410c',
+  '#1c2228',
+  '#0f766e'
+]
 
 
 function getScore(car, key) {
@@ -161,7 +153,7 @@ onBeforeUnmount(() => {
 
 <template>
   <section class="comparison-section p-4 mt-4">
-    <h3 class="h5 mb-2">
+    <h3 class="h4 fw-bold mb-2">
       Interactive Car Comparison
     </h3>
 
@@ -192,7 +184,7 @@ onBeforeUnmount(() => {
 
     <!-- Accessible alternative to the chart -->
     <details class="mt-3">
-      <summary class="fw-semibold table-toggle">
+      <summary class="fw-semibold">
         View comparison scores as a table
       </summary>
 
@@ -226,17 +218,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.comparison-section {
-  background: var(--dd-white);
-  border: 1px solid var(--dd-line);
-  border-radius: var(--dd-radius);
-}
-
-.table-toggle {
-  color: var(--dd-primary);
-  cursor: pointer;
-}
-
 .chart-scroll {
   width: 100%;
   max-width: 100%;
@@ -248,6 +229,11 @@ onBeforeUnmount(() => {
   position: relative;
   width: 100%;
   height: 350px;
+}
+
+.chart-scroll:focus-visible {
+  outline: 2px solid #c2410c;
+  outline-offset: 2px;
 }
 
 @media (max-width: 767px) {

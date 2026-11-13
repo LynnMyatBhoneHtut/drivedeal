@@ -2,7 +2,6 @@
 import { computed, ref, toRef, watch } from 'vue'
 import { useCarRecommendations } from '../composables/useCarRecommendations'
 import CarComparisonChart from './CarComparisonChart.vue'
-import AppIcon from './AppIcon.vue'
 
 const props = defineProps({
   cars: {
@@ -176,21 +175,21 @@ function getScoreDetails(car) {
 </script>
 
 <template>
-  <section class="smart-match p-3 p-md-4 mb-4 mb-lg-5" aria-labelledby="smartMatchTitle">
-    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-      <div class="d-flex align-items-start gap-3">
-        <span class="smart-icon"><AppIcon name="sparkles" :size="24" /></span>
-        <div>
-          <span class="dd-eyebrow mb-1">Personalised search</span>
-          <h2 id="smartMatchTitle" class="h3 mb-1">Smart Match</h2>
-          <p class="text-muted mb-0">
-            Tell us what matters to you and we'll rank the cars that fit best.
-          </p>
-        </div>
+  <section class="smart-match p-3 p-md-4 mb-4">
+    <div
+class="d-flex flex-wrap justify-content-between
+                align-items-center gap-3 mb-4">
+      <div>
+        <p class="section-label mb-2">PERSONALISED SEARCH</p>
+        <h2 class="h3 fw-bold mb-2">Smart Car Match</h2>
+        <p class="text-muted mb-0">
+          Tell us what matters to you and discover
+          cars that match your preferences.
+        </p>
       </div>
 
-      <button type="button" class="btn btn-outline-primary btn-sm" @click="resetPreferences">
-        Reset preferences
+      <button type="button" class="btn btn-outline-dark" @click="resetPreferences">
+        Reset Preferences
       </button>
     </div>
 
@@ -283,7 +282,7 @@ id="matchMileage" v-model.number="preferences.maxMileage" type="range" class="fo
 
     <!-- Recommendation results -->
     <div v-if="activeWeightTotal > 0">
-      <h3 class="h5 mb-2">
+      <h3 class="h4 fw-bold mb-2">
         Your Recommended Cars
       </h3>
 
@@ -318,7 +317,7 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
             </p>
 
             <p class="text-muted small">
-              {{ car.year }} Ã‚Â·
+              {{ car.year }} ·
               {{ formatNumber(car.mileage_km) }} km
             </p>
 
@@ -330,7 +329,7 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
 
 
             <!-- Explain each recommendation score -->
-            <details class="score-details mb-3">
+            <details class="border rounded p-3 mb-3">
               <summary class="fw-semibold">
                 Why this score?
               </summary>
@@ -346,7 +345,7 @@ v-for="factor in getScoreDetails(car)" :key="factor.key"
                 <div class="small">
                   <strong>{{ factor.label }}</strong>
                   <div class="text-muted">
-                    {{ factor.score }}/100 Ãƒâ€” {{ factor.weight }}% importance
+                    {{ factor.score }}/100 × {{ factor.weight }}% importance
                   </div>
                 </div>
 
@@ -369,7 +368,7 @@ v-for="factor in getScoreDetails(car)" :key="factor.key"
 :to="{
               name: 'car-detail',
               params: { id: car.listing_id }
-            }" class="btn btn-outline-primary w-100">
+            }" class="btn btn-outline-dark w-100">
               View Details
             </router-link>
           </article>
@@ -403,7 +402,7 @@ v-for="factor in getScoreDetails(car)" :key="factor.key"
       </p>
 
       <div class="d-flex flex-wrap gap-2 mb-3">
-        <span v-for="car in comparisonCars" :key="car.listing_id" class="dd-chip dd-chip-active">
+        <span v-for="car in comparisonCars" :key="car.listing_id" class="badge text-bg-light border text-dark">
           {{ car.make }} {{ car.model }}
         </span>
       </div>
@@ -449,66 +448,77 @@ v-if="activeWeightTotal > 0" :cars="comparisonCars"
 
 <style scoped>
 .smart-match {
-  background: var(--dd-primary-50);
-  border: 1px solid var(--dd-primary-100);
-  border-radius: var(--dd-radius-lg);
+  background: #faf8f5;
+  border: 1px solid #e9e5e1;
+  border-radius: 16px;
 }
 
-.smart-icon {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--dd-radius);
-  background: var(--dd-gradient);
-  color: var(--dd-white);
-  box-shadow: var(--dd-shadow);
+.section-label {
+  color: #c2410c;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
 }
 
 .match-value {
-  color: var(--dd-primary);
-  font-size: 1.125rem;
-  font-weight: 800;
+  color: #c2410c;
+  font-size: 18px;
 }
 
 .weights-panel {
-  background: var(--dd-white);
-  border: 1px solid var(--dd-line);
-  border-radius: var(--dd-radius);
+  background: white;
+  border: 1px solid #e9e5e1;
+  border-radius: 12px;
 }
 
 .recommendation-card {
-  background: var(--dd-white);
-  border: 1px solid var(--dd-line);
-  border-radius: var(--dd-radius);
-  box-shadow: var(--dd-shadow-sm);
+  background: white;
+  border: 1px solid #e9e5e1;
+  border-radius: 12px;
 }
 
 .score-label {
-  background: var(--dd-primary);
-  color: var(--dd-white);
-  border-radius: var(--dd-radius-pill);
-  padding: 5px 11px;
-  font-size: 0.8125rem;
+  background: #fff0e6;
+  color: #9a3412;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .match-progress {
-  background: var(--dd-primary);
+  background: #c2410c;
 }
 
-.score-details {
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--dd-line);
-  border-radius: var(--dd-radius-sm);
-  background: var(--dd-surface);
+/* Copper slider controls */
+.form-range::-webkit-slider-thumb {
+  background-color: #c2410c;
 }
 
-.score-details summary {
-  color: var(--dd-primary);
-  cursor: pointer;
+.form-range::-moz-range-thumb {
+  background-color: #c2410c;
+  border-color: #c2410c;
+}
+
+.form-range:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 0.25rem rgba(194, 65, 12, 0.2);
+}
+
+.form-range:focus-visible,
+.form-select:focus-visible {
+  outline: 2px solid #c2410c;
+  outline-offset: 2px;
+}
+
+/* Copper comparison checkboxes */
+.form-check-input:checked {
+  background-color: #c2410c;
+  border-color: #c2410c;
+}
+
+.form-check-input:focus {
+  border-color: #c2410c;
+  box-shadow: 0 0 0 0.25rem rgba(194, 65, 12, 0.2);
 }
 </style>
