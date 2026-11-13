@@ -119,12 +119,47 @@ const activeWeightTotal = computed(() => {
   )
 })
 
+// Fields used to explain the weighted recommendation score
+const scoreCriteria = [
+  { key: 'price', label: 'Price' },
+  { key: 'mileage', label: 'Mileage' },
+  { key: 'age', label: 'Vehicle Age' },
+  { key: 'make', label: 'Brand Preference' }
+]
+
+// Show only criteria which contribute to the current match score
+function getScoreDetails(car) {
+  const total = activeWeightTotal.value
+
+  if (total <= 0) return []
+
+  return scoreCriteria
+    .filter(field => {
+      const isActive = Number(preferences.value.weights[field.key]) > 0
+      const isRelevant = field.key !== 'make' ||
+        Boolean(preferences.value.preferredMake)
+
+      return isActive && isRelevant
+    })
+    .map(field => {
+      const weight = Number(preferences.value.weights[field.key])
+      const score = Number(car.scoreBreakdown?.[field.key] ?? 0)
+
+      return {
+        key: field.key,
+        label: field.label,
+        score: score.toFixed(1),
+        weight: ((weight / total) * 100).toFixed(1),
+        contribution: ((score * weight) / total).toFixed(1)
+      }
+    })
+}
+
 </script>
 
 <template>
   <section class="smart-match p-4 mb-4">
-    <div
-class="d-flex flex-wrap justify-content-between
+    <div class="d-flex flex-wrap justify-content-between
                 align-items-center gap-3 mb-4">
       <div>
         <p class="section-label mb-2">PERSONALISED SEARCH</p>
@@ -147,8 +182,7 @@ class="d-flex flex-wrap justify-content-between
           Maximum Budget
         </label>
 
-        <input
-id="matchBudget" v-model.number="preferences.budget" type="range" class="form-range" min="30000"
+        <input id="matchBudget" v-model.number="preferences.budget" type="range" class="form-range" min="30000"
           max="160000" step="5000" />
 
         <p class="fw-bold match-value mb-0">
@@ -161,8 +195,7 @@ id="matchBudget" v-model.number="preferences.budget" type="range" class="form-ra
           Preferred Maximum Mileage
         </label>
 
-        <input
-id="matchMileage" v-model.number="preferences.maxMileage" type="range" class="form-range" min="10000"
+        <input id="matchMileage" v-model.number="preferences.maxMileage" type="range" class="form-range" min="10000"
           max="200000" step="5000" />
 
         <p class="fw-bold match-value mb-0">
@@ -202,9 +235,19 @@ id="matchMileage" v-model.number="preferences.maxMileage" type="range" class="fo
             <span>{{ preferences.weights[field.key] }}</span>
           </label>
 
-          <input
-:id="`weight-${field.key}`" v-model.number="preferences.weights[field.key]" type="range"
-            class="form-range" min="0" max="100" step="5" />
+
+          <input :id="`weight-${field.key}`" v-model.number="preferences.weights[field.key]" type="range"
+            class="form-range" min="0" max="100" step="5" :disabled="field.key === 'make' && !preferences.preferredMake"
+            :aria-describedby="field.key === 'make' ? 'brandWeightHint' : undefined" />
+
+          <p v-if="field.key === 'make'" id="brandWeightHint" class="small text-muted mt-1 mb-0">
+            {{
+              preferences.preferredMake
+                ? 'Adjust how important your preferred brand is.'
+                : 'Choose a Preferred Brand above to enable this slider.'
+            }}
+          </p>
+
         </div>
       </div>
     </div>
@@ -230,8 +273,7 @@ id="matchMileage" v-model.number="preferences.maxMileage" type="range" class="fo
       <div v-if="recommendations.length" class="row g-3">
         <div v-for="car in recommendations.slice(0, 3)" :key="car.listing_id" class="col-12 col-lg-4">
           <article class="recommendation-card h-100 p-3">
-            <div
-class="d-flex justify-content-between
+            <div class="d-flex justify-content-between
                         align-items-start gap-2 mb-2">
               <h4 class="h5 fw-bold mb-0">
                 {{ car.make }} {{ car.model }}
@@ -242,8 +284,7 @@ class="d-flex justify-content-between
               </span>
             </div>
 
-            <div
-class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car.matchScore"
+            <div class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car.matchScore"
               aria-valuemin="0" aria-valuemax="100" :aria-label="`Match score for ${car.make} ${car.model}`">
               <div class="progress-bar match-progress" :style="{ width: `${car.matchScore}%` }"></div>
             </div>
@@ -263,8 +304,43 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
               </li>
             </ul>
 
-            <router-link
-:to="{
+
+            <!-- Explain each recommendation score -->
+            <details class="border rounded p-3 mb-3">
+              <summary class="fw-semibold">
+                Why this score?
+              </summary>
+
+              <p class="small text-muted mt-3 mb-2">
+                Your match score is calculated using the suitability
+                of this car and the importance you assigned to each factor.
+              </p>
+
+              <div v-for="factor in getScoreDetails(car)" :key="factor.key"
+                class="d-flex justify-content-between gap-2 border-bottom py-2">
+                <div class="small">
+                  <strong>{{ factor.label }}</strong>
+                  <div class="text-muted">
+                    {{ factor.score }}/100 × {{ factor.weight }}% importance
+                  </div>
+                </div>
+
+                <strong class="small text-nowrap">
+                  {{ factor.contribution }} pts
+                </strong>
+              </div>
+
+              <p class="small fw-semibold mt-3 mb-0">
+                Final match score: {{ car.matchScore }}/100
+              </p>
+
+              <p class="small text-muted mb-0">
+                Individual contributions are shown rounded to one decimal place.
+              </p>
+            </details>
+
+
+            <router-link :to="{
               name: 'car-detail',
               params: { id: car.listing_id }
             }" class="btn btn-outline-dark w-100">
@@ -293,8 +369,7 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
 
       <div class="d-flex flex-wrap gap-4">
         <div v-for="car in recommendations" :key="car.listing_id" class="form-check">
-          <input
-:id="`compare-${car.listing_id}`" type="checkbox" class="form-check-input" :checked="selectedCarIds.includes(String(car.listing_id))
+          <input :id="`compare-${car.listing_id}`" type="checkbox" class="form-check-input" :checked="selectedCarIds.includes(String(car.listing_id))
             " :disabled="(selectedCarIds.includes(String(car.listing_id)) &&
               selectedCarIds.length <= 2) ||
               (!selectedCarIds.includes(String(car.listing_id)) &&
@@ -312,10 +387,8 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
 
     <!-- Interactive comparison -->
 
-    <CarComparisonChart
-v-if="activeWeightTotal > 0" :cars="comparisonCars"
+    <CarComparisonChart v-if="activeWeightTotal > 0" :cars="comparisonCars"
       :show-brand="Boolean(preferences.preferredMake)" />
-
 
   </section>
 </template>
