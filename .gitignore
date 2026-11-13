@@ -10,6 +10,9 @@ uploads/*
 !uploads/.gitkeep
 !uploads/sample/
 
+# Other companies' designs, used only as inspiration - never commit them
+design/references/
+
 # Editor / OS junk
 .DS_Store
 Thumbs.db
