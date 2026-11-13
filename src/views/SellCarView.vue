@@ -6,6 +6,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import CarForm from '../components/CarForm.vue'
+import AppIcon from '../components/AppIcon.vue'
+import PageHeader from '../components/PageHeader.vue'
 import { apiPost, apiUpload } from '../services/api'
 import { currentUser, getUser } from '../services/auth'
 
@@ -63,40 +65,46 @@ async function save(carData, files) {
 </script>
 
 <template>
-  <section class="container py-4">
-    <div class="row justify-content-center">
-      <div class="col-12 col-lg-10 col-xl-9">
-        <h1 class="mb-1">Sell a car</h1>
-        <p class="text-muted mb-4">
-          Fill in your car's details and add photos to list it for sale.
-        </p>
+  <div>
+    <PageHeader title="Sell a car">
+      <template #subtitle>Fill in your car's details and add photos to list it for sale.</template>
+    </PageHeader>
 
-        <div v-if="!currentUser" class="alert alert-info" role="alert">
-          <h2 class="h5">Please log in to sell a car</h2>
-          <p class="mb-0">
-            <router-link :to="{ name: 'login' }" class="alert-link">Log in</router-link>
-            or
-            <router-link :to="{ name: 'register' }" class="alert-link"
-              >create an account</router-link
-            >
-            to list your car.
-          </p>
+    <section class="container py-4 py-lg-5">
+      <div class="sell-wrap">
+        <div v-if="!currentUser" class="dd-empty">
+          <span class="dd-icon-circle"><AppIcon name="user" :size="28" /></span>
+          <h2>Please sign in to sell a car</h2>
+          <p>It's free to list your car, and buyers can contact you straight away.</p>
+          <div class="d-flex flex-wrap justify-content-center gap-2">
+            <router-link :to="{ name: 'login' }" class="btn btn-primary">Sign in</router-link>
+            <router-link :to="{ name: 'register' }" class="btn btn-outline-primary">
+              Create an account
+            </router-link>
+          </div>
         </div>
 
         <template v-else>
           <div v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
-          <div v-if="progress" class="alert alert-info d-flex align-items-center" role="status">
-            <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          <div
+            v-if="progress"
+            class="alert alert-info d-flex align-items-center gap-2"
+            role="status"
+          >
+            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
             {{ progress }}
           </div>
 
-          <div class="card shadow-sm">
-            <div class="card-body p-3 p-md-4">
-              <CarForm :saving="saving" @submit="save" />
-            </div>
-          </div>
+          <CarForm :saving="saving" @submit="save" />
         </template>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </template>
+
+<style scoped>
+.sell-wrap {
+  max-width: 920px;
+  margin: 0 auto;
+}
+</style>

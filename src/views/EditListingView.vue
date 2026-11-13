@@ -7,6 +7,8 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import CarForm from '../components/CarForm.vue'
+import AppIcon from '../components/AppIcon.vue'
+import PageHeader from '../components/PageHeader.vue'
 import { apiDelete, apiGet, apiPut, apiUpload } from '../services/api'
 import { currentUser, getUser } from '../services/auth'
 
@@ -174,66 +176,62 @@ onBeforeUnmount(() => document.body.classList.remove('modal-open'))
 </script>
 
 <template>
-  <section class="container py-4">
-    <div class="row justify-content-center">
-      <div class="col-12 col-lg-10 col-xl-9">
-        <div v-if="loading" class="text-center py-5">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
+  <div>
+    <PageHeader
+      title="Edit listing"
+      :crumbs="[{ label: 'My listings', to: { name: 'my-listings' } }]"
+    >
+      <template v-if="car && isOwner" #subtitle>
+        {{ car.make }} {{ car.model }} ({{ car.year }}) &middot;
+        <router-link :to="{ name: 'car-detail', params: { id: car.listing_id } }">
+          View listing
+        </router-link>
+      </template>
+    </PageHeader>
+
+    <section class="container py-4 py-lg-5">
+      <div class="edit-wrap">
+        <div v-if="loading" aria-busy="true">
+          <div class="dd-skeleton mb-3" style="height: 28px; width: 50%"></div>
+          <div class="dd-skeleton mb-3" style="height: 260px"></div>
+          <div class="dd-skeleton" style="height: 200px"></div>
+          <span class="visually-hidden" role="status">Loading...</span>
         </div>
 
-        <div v-else-if="notFound" class="alert alert-warning" role="alert">
-          <h1 class="h4">Car not found</h1>
-          <p class="mb-0">
-            This car doesn't exist or has been deleted.
-            <router-link :to="{ name: 'my-listings' }" class="alert-link">
-              Back to My listings
-            </router-link>
-          </p>
+        <div v-else-if="notFound" class="dd-empty" role="alert">
+          <span class="dd-icon-circle"><AppIcon name="car" :size="28" /></span>
+          <h2>Car not found</h2>
+          <p>This car doesn't exist or has been deleted.</p>
+          <router-link :to="{ name: 'my-listings' }" class="btn btn-primary">
+            Back to My listings
+          </router-link>
         </div>
 
-        <div v-else-if="loadError" class="alert alert-danger" role="alert">
-          {{ loadError }}
-          <button type="button" class="btn btn-sm btn-outline-danger ms-2" @click="loadCar()">
+        <div
+          v-else-if="loadError"
+          class="alert alert-danger d-flex flex-wrap align-items-center gap-3"
+          role="alert"
+        >
+          <span>{{ loadError }}</span>
+          <button type="button" class="btn btn-sm btn-outline-danger" @click="loadCar()">
             Try again
           </button>
         </div>
 
-        <div v-else-if="!isOwner" class="alert alert-warning" role="alert">
-          <h1 class="h4">You can only edit your own listings</h1>
-          <p class="mb-0">
-            <template v-if="!currentUser">
-              Please <router-link :to="{ name: 'login' }" class="alert-link">log in</router-link>
-              as the seller of this car.
-            </template>
-            <router-link :to="{ name: 'my-listings' }" class="alert-link">
-              Go to My listings
-            </router-link>
+        <div v-else-if="!isOwner" class="dd-empty" role="alert">
+          <span class="dd-icon-circle"><AppIcon name="shield-check" :size="28" /></span>
+          <h2>You can only edit your own listings</h2>
+          <p v-if="!currentUser">
+            Please
+            <router-link :to="{ name: 'login' }">sign in</router-link>
+            as the seller of this car.
           </p>
+          <router-link :to="{ name: 'my-listings' }" class="btn btn-primary">
+            Go to My listings
+          </router-link>
         </div>
 
         <template v-else>
-          <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-4">
-            <div>
-              <h1 class="mb-1">Edit listing</h1>
-              <p class="text-muted mb-0">
-                {{ car.make }} {{ car.model }} ({{ car.year }}) &middot;
-                <router-link :to="{ name: 'car-detail', params: { id: car.listing_id } }">
-                  View listing
-                </router-link>
-              </p>
-            </div>
-            <button
-              type="button"
-              class="btn btn-danger"
-              :disabled="saving || deleting"
-              @click="openDeleteModal"
-            >
-              Delete listing
-            </button>
-          </div>
-
           <div v-if="successMessage" class="alert alert-success" role="status">
             {{ successMessage }}
           </div>
@@ -246,19 +244,30 @@ onBeforeUnmount(() => document.body.classList.remove('modal-open'))
             <p class="mb-0 small">You can try adding them again below.</p>
           </div>
 
-          <div class="card shadow-sm">
-            <div class="card-body p-3 p-md-4">
-              <CarForm
-                :initial-car="car"
-                :saving="saving"
-                @submit="save"
-                @remove-image="removeImage"
-              />
+          <CarForm :initial-car="car" :saving="saving" @submit="save" @remove-image="removeImage" />
+
+          <!-- Danger zone -->
+          <div class="danger-zone dd-card mt-4">
+            <div>
+              <h2 class="h3 mb-1 d-flex align-items-center gap-2">
+                <AppIcon name="alert" :size="20" /> Danger zone
+              </h2>
+              <p class="text-muted mb-0">
+                Deleting removes this car with all its photos, likes and enquiries.
+              </p>
             </div>
+            <button
+              type="button"
+              class="btn btn-outline-danger"
+              :disabled="saving || deleting"
+              @click="openDeleteModal"
+            >
+              <AppIcon name="trash" :size="18" /> Delete listing
+            </button>
           </div>
         </template>
       </div>
-    </div>
+    </section>
 
     <!-- Delete confirmation (Bootstrap modal markup, opened and closed by Vue) -->
     <template v-if="showDeleteModal && car">
@@ -321,5 +330,27 @@ onBeforeUnmount(() => document.body.classList.remove('modal-open'))
       </div>
       <div class="modal-backdrop fade show"></div>
     </template>
-  </section>
+  </div>
 </template>
+
+<style scoped>
+.edit-wrap {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.danger-zone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-color: var(--dd-danger-50);
+  background: var(--dd-white);
+}
+
+.danger-zone h2 {
+  color: var(--dd-danger);
+}
+</style>

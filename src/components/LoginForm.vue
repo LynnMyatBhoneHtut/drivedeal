@@ -4,6 +4,7 @@
 // emit('submit', { email, password }) - LoginView calls login.php.
 import { computed, reactive, ref } from 'vue'
 import { emailError } from '../services/accountRules'
+import AppIcon from './AppIcon.vue'
 
 defineProps({
   saving: { type: Boolean, default: false }
@@ -77,6 +78,7 @@ function submit() {
           :aria-pressed="showPassword"
           @click="showPassword = !showPassword"
         >
+          <AppIcon :name="showPassword ? 'x' : 'eye'" :size="18" />
           {{ showPassword ? 'Hide' : 'Show' }}
         </button>
         <div class="invalid-feedback">{{ errors.password }}</div>
@@ -85,7 +87,7 @@ function submit() {
 
     <button type="submit" class="btn btn-primary w-100" :disabled="saving">
       <span v-if="saving" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-      {{ saving ? 'Logging in...' : 'Log in' }}
+      {{ saving ? 'Signing in...' : 'Sign in' }}
     </button>
   </form>
 </template>

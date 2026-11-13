@@ -12,6 +12,7 @@ import {
   passwordStrength,
   phoneError
 } from '../services/accountRules'
+import AppIcon from './AppIcon.vue'
 
 const props = defineProps({
   saving: { type: Boolean, default: false },
@@ -74,7 +75,7 @@ const STRENGTH = [
   { label: 'Too short', className: 'bg-danger', width: '10%' },
   { label: 'Weak', className: 'bg-danger', width: '25%' },
   { label: 'Fair', className: 'bg-warning', width: '50%' },
-  { label: 'Good', className: 'bg-info', width: '75%' },
+  { label: 'Good', className: 'bg-primary', width: '75%' },
   { label: 'Strong', className: 'bg-success', width: '100%' }
 ]
 const strength = computed(() => STRENGTH[passwordStrength(form.password)])
@@ -175,6 +176,7 @@ function submit() {
           :aria-pressed="showPassword"
           @click="showPassword = !showPassword"
         >
+          <AppIcon :name="showPassword ? 'x' : 'eye'" :size="18" />
           {{ showPassword ? 'Hide' : 'Show' }}
         </button>
         <div class="invalid-feedback">{{ errorText('password') }}</div>

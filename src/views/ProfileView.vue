@@ -6,6 +6,8 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiGet, apiPut } from '../services/api'
+import AppIcon from '../components/AppIcon.vue'
+import PageHeader from '../components/PageHeader.vue'
 import { currentUser, logout, setUser } from '../services/auth'
 import {
   emailError,
@@ -185,68 +187,75 @@ function handleLogout() {
 </script>
 
 <template>
-  <section class="container py-4">
-    <div v-if="!currentUser" class="alert alert-info" role="alert">
-      <h1 class="h4">Please log in to see your profile</h1>
-      <router-link :to="{ name: 'login', query: { redirect: '/profile' } }" class="alert-link">
-        Log in
-      </router-link>
-    </div>
+  <div>
+    <PageHeader title="My profile">
+      <template v-if="currentUser" #subtitle>Your account details and shortcuts.</template>
+    </PageHeader>
 
-    <template v-else>
-      <h1 class="mb-4">My profile</h1>
-
-      <div v-if="loading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading your profile...</span>
-        </div>
-      </div>
-
-      <div v-else-if="loadError" class="alert alert-danger" role="alert">
-        {{ loadError }}
-        <button
-          type="button"
-          class="btn btn-sm btn-outline-danger ms-2"
-          @click="load(currentUser.user_id)"
+    <section class="container py-4 py-lg-5">
+      <div v-if="!currentUser" class="dd-empty">
+        <span class="dd-icon-circle"><AppIcon name="user" :size="28" /></span>
+        <h2>Please sign in to see your profile</h2>
+        <router-link
+          :to="{ name: 'login', query: { redirect: '/profile' } }"
+          class="btn btn-primary mt-2"
         >
-          Try again
-        </button>
+          Sign in
+        </router-link>
       </div>
 
-      <div v-else-if="profile" class="row g-4">
-        <!-- Summary card -->
-        <div class="col-12 col-lg-4">
-          <div class="card shadow-sm text-center h-100">
-            <div class="card-body p-4">
-              <div
-                class="avatar rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center fs-3 fw-bold mb-3"
-                aria-hidden="true"
-              >
-                {{ initials }}
-              </div>
-              <h2 class="h4 mb-1">{{ profile.full_name }}</h2>
-              <p class="text-muted mb-2">{{ profile.email }}</p>
-              <span v-if="profile.role === 'admin'" class="badge bg-dark mb-2">Admin</span>
-              <p v-if="memberSince" class="small text-muted mb-4">Member since {{ memberSince }}</p>
+      <template v-else>
+        <div v-if="loading" class="row g-4" aria-busy="true">
+          <div class="col-12 col-lg-4"><div class="dd-skeleton" style="height: 340px"></div></div>
+          <div class="col-12 col-lg-8"><div class="dd-skeleton" style="height: 340px"></div></div>
+          <span class="visually-hidden" role="status">Loading your profile...</span>
+        </div>
+
+        <div
+          v-else-if="loadError"
+          class="alert alert-danger d-flex flex-wrap align-items-center gap-3"
+          role="alert"
+        >
+          <span>{{ loadError }}</span>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-danger"
+            @click="load(currentUser.user_id)"
+          >
+            Try again
+          </button>
+        </div>
+
+        <div v-else-if="profile" class="row g-4">
+          <!-- Summary card -->
+          <div class="col-12 col-lg-4">
+            <div class="dd-card dd-card-body text-center h-100">
+              <span class="dd-avatar profile-avatar mb-3" aria-hidden="true">{{ initials }}</span>
+              <h2 class="h3 mb-1">{{ profile.full_name }}</h2>
+              <p class="text-muted mb-2 text-break">{{ profile.email }}</p>
+              <span v-if="profile.role === 'admin'" class="dd-status dd-status-available mb-2">
+                Admin
+              </span>
+              <p v-if="memberSince" class="small text-muted mb-4">
+                <AppIcon name="calendar" :size="16" /> Member since {{ memberSince }}
+              </p>
               <div class="d-grid gap-2">
                 <router-link :to="{ name: 'my-listings' }" class="btn btn-outline-primary">
-                  My listings
+                  <AppIcon name="list" :size="18" /> My listings
                 </router-link>
-                <router-link :to="{ name: 'liked' }" class="btn btn-outline-danger">
-                  &hearts; Liked cars
+                <router-link :to="{ name: 'liked' }" class="btn btn-outline-primary">
+                  <AppIcon name="heart" :size="18" /> Liked cars
                 </router-link>
-                <button type="button" class="btn btn-outline-secondary" @click="handleLogout">
-                  Log out
+                <button type="button" class="btn btn-ghost" @click="handleLogout">
+                  <AppIcon name="logout" :size="18" /> Log out
                 </button>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Details / edit -->
-        <div class="col-12 col-lg-8">
-          <div class="card shadow-sm h-100">
-            <div class="card-body p-4">
+          <!-- Details / edit -->
+          <div class="col-12 col-lg-8">
+            <div class="dd-card dd-card-body h-100">
               <div
                 v-if="successMessage"
                 class="alert alert-success alert-dismissible"
@@ -263,32 +272,52 @@ function handleLogout() {
 
               <!-- View mode -->
               <template v-if="!editing">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h2 class="h5 mb-0">Account details</h2>
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                  <h2 class="h3 mb-0">Account details</h2>
                   <button type="button" class="btn btn-primary btn-sm" @click="startEditing">
-                    Edit profile
+                    <AppIcon name="edit" :size="16" /> Edit profile
                   </button>
                 </div>
-                <dl class="row mb-0">
-                  <dt class="col-sm-4">Full name</dt>
-                  <dd class="col-sm-8">{{ profile.full_name }}</dd>
-                  <dt class="col-sm-4">Email</dt>
-                  <dd class="col-sm-8">{{ profile.email }}</dd>
-                  <dt class="col-sm-4">Phone</dt>
-                  <dd class="col-sm-8">
-                    {{ profile.phone || 'Not added' }}
-                    <span v-if="!profile.phone" class="d-block small text-muted">
-                      Add a phone number so buyers can call you about your cars.
-                    </span>
-                  </dd>
-                  <dt class="col-sm-4">Password</dt>
-                  <dd class="col-sm-8 mb-0">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</dd>
+                <dl class="detail-list mb-0">
+                  <div class="detail-row">
+                    <span class="dd-icon-circle"><AppIcon name="user" /></span>
+                    <div>
+                      <dt>Full name</dt>
+                      <dd>{{ profile.full_name }}</dd>
+                    </div>
+                  </div>
+                  <div class="detail-row">
+                    <span class="dd-icon-circle"><AppIcon name="mail" /></span>
+                    <div>
+                      <dt>Email</dt>
+                      <dd class="text-break">{{ profile.email }}</dd>
+                    </div>
+                  </div>
+                  <div class="detail-row">
+                    <span class="dd-icon-circle"><AppIcon name="phone" /></span>
+                    <div>
+                      <dt>Phone</dt>
+                      <dd>
+                        {{ profile.phone || 'Not added' }}
+                        <span v-if="!profile.phone" class="d-block small text-muted">
+                          Add a phone number so buyers can call you about your cars.
+                        </span>
+                      </dd>
+                    </div>
+                  </div>
+                  <div class="detail-row">
+                    <span class="dd-icon-circle"><AppIcon name="shield-check" /></span>
+                    <div>
+                      <dt>Password</dt>
+                      <dd>&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</dd>
+                    </div>
+                  </div>
                 </dl>
               </template>
 
               <!-- Edit mode -->
               <form v-else class="profile-form" novalidate @submit.prevent="save">
-                <h2 class="h5 mb-3">Edit profile</h2>
+                <h2 class="h3 mb-3">Edit profile</h2>
 
                 <div class="mb-3">
                   <label for="pf-name" class="form-label">Full name</label>
@@ -352,7 +381,7 @@ function handleLogout() {
                   </label>
                 </div>
 
-                <div v-if="changePassword" class="border rounded p-3 mb-3 bg-light">
+                <div v-if="changePassword" class="password-box mb-3">
                   <div class="mb-3">
                     <label for="pf-current" class="form-label">Current password</label>
                     <input
@@ -427,14 +456,54 @@ function handleLogout() {
             </div>
           </div>
         </div>
-      </div>
-    </template>
-  </section>
+      </template>
+    </section>
+  </div>
 </template>
 
 <style scoped>
-.avatar {
-  width: 80px;
-  height: 80px;
+.profile-avatar {
+  width: 88px;
+  height: 88px;
+  background: var(--dd-gradient);
+  color: var(--dd-white);
+  font-size: 1.75rem;
+}
+
+.detail-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--dd-line);
+}
+
+.detail-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.detail-row dt {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--dd-muted);
+}
+
+.detail-row dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--dd-ink);
+}
+
+.password-box {
+  padding: 1rem;
+  border: 1px solid var(--dd-line);
+  border-radius: var(--dd-radius-sm);
+  background: var(--dd-surface);
 }
 </style>
