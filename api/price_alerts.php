@@ -72,7 +72,7 @@ function record_price_change($listingId, $oldPrice, $newPrice) {
   return count($watchers);
 }
 
-/** true once yati_watchlist.sql has been imported. */
+/** true once database/drivedeal.sql (with the watchlist tables) has been imported. */
 function watchlist_tables_exist() {
   static $exists = null;
   if ($exists === null) {
@@ -93,6 +93,6 @@ function positive_id($value) {
 /** Fail with a clear message if the watchlist tables are missing. */
 function require_watchlist_tables() {
   if (!watchlist_tables_exist()) {
-    fail('The watchlist tables are missing. Import database/yati_watchlist.sql first.', 500);
+    fail('The watchlist tables are missing. Import database/drivedeal.sql first.', 500);
   }
 }
