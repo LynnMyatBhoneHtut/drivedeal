@@ -564,6 +564,9 @@ const DRIVE_LABELS = {
 <style scoped>
 .offer-thread {
   padding: 1.25rem;
+  /* The board below sizes itself to this card, not the screen: the same component sits in the
+     narrow Car detail sidebar and in the wide My listings / My offers lists. */
+  container-type: inline-size;
 }
 
 .offer-thread.is-ended {
@@ -652,6 +655,26 @@ const DRIVE_LABELS = {
 
 .price-value.muted {
   color: var(--dd-ink);
+}
+
+/* Narrow card (Car detail sidebar): one row per price, so full amounts always fit */
+@container (max-width: 440px) {
+  .price-board {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .price-cell {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .price-value {
+    font-size: 1.05rem;
+  }
 }
 
 /* Gap meter */
