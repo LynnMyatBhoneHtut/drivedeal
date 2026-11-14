@@ -196,7 +196,8 @@ const nextSteps = [
                 <div class="row g-3">
                   <div class="col-12 col-md-6">
                     <label for="contactName" class="form-label">Full name</label>
-                    <input id="contactName" v-model.trim="form.name" type="text" class="form-control"
+                    <input
+id="contactName" v-model.trim="form.name" type="text" class="form-control"
                       :class="{ 'is-invalid': fieldErrors.name }" :aria-invalid="Boolean(fieldErrors.name)"
                       :aria-describedby="fieldErrors.name ? 'contactNameError' : undefined" placeholder="Your full name"
                       maxlength="100" autocomplete="name" required @blur="validateField('name')"
@@ -208,7 +209,8 @@ const nextSteps = [
 
                   <div class="col-12 col-md-6">
                     <label for="contactEmail" class="form-label">Email address</label>
-                    <input id="contactEmail" v-model.trim="form.email" type="email" class="form-control"
+                    <input
+id="contactEmail" v-model.trim="form.email" type="email" class="form-control"
                       :class="{ 'is-invalid': fieldErrors.email }" :aria-invalid="Boolean(fieldErrors.email)"
                       :aria-describedby="fieldErrors.email ? 'contactEmailError' : undefined"
                       placeholder="you@example.com" maxlength="150" autocomplete="email" required
@@ -220,13 +222,15 @@ const nextSteps = [
 
                   <div class="col-12">
                     <label for="contactMessage" class="form-label">Message</label>
-                    <textarea id="contactMessage" v-model.trim="form.message" class="form-control"
+                    <textarea
+id="contactMessage" v-model.trim="form.message" class="form-control"
                       :class="{ 'is-invalid': fieldErrors.message }" :aria-invalid="Boolean(fieldErrors.message)"
                       :aria-describedby="fieldErrors.message ? 'contactMessageHint contactMessageError' : 'contactMessageHint'"
                       rows="5" minlength="10" maxlength="2000" placeholder="Write your message here..." required
                       @blur="validateField('message')" @input="revalidateIfNeeded('message')"></textarea>
                     <div id="contactMessageHint" class="form-text">At least 10 characters.</div>
-                    <div v-if="fieldErrors.message" id="contactMessageError" class="invalid-feedback d-block"
+                    <div
+v-if="fieldErrors.message" id="contactMessageError" class="invalid-feedback d-block"
                       role="alert">
                       {{ fieldErrors.message }}
                     </div>
