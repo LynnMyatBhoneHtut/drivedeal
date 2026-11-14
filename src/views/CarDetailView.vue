@@ -29,7 +29,11 @@ async function loadCar(id) {
   car.value = null
 
   try {
-    const data = await apiGet('listings.php', { id })
+    const data = await apiGet('listings.php', {
+      id,
+      user_id: currentUser.value?.user_id
+    })
+
 
     if (!data || Number(data.listing_id) !== Number(id)) {
       throw new Error('Invalid vehicle data received.')
@@ -174,7 +178,9 @@ const statusLabel = computed(() => {
       </div>
 
       <div v-else-if="loadError" class="dd-empty" role="alert">
-        <span class="dd-icon-circle"><AppIcon name="alert" :size="28" /></span>
+        <span class="dd-icon-circle">
+          <AppIcon name="alert" :size="28" />
+        </span>
         <h1 class="h3">We couldn't load this car</h1>
         <p>{{ loadError }}</p>
         <div class="d-flex flex-wrap justify-content-center gap-2">
@@ -190,31 +196,25 @@ const statusLabel = computed(() => {
         <div class="col-12 col-lg-7 col-xl-8">
           <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
             <span
-              class="dd-status"
-              :class="`dd-status-${car.status === 'reserved' || car.status === 'sold' ? car.status : 'available'}`"
-            >
+class="dd-status"
+              :class="`dd-status-${car.status === 'reserved' || car.status === 'sold' ? car.status : 'available'}`">
               {{ statusLabel }}
             </span>
-            <span
-              v-if="car.location"
-              class="text-muted small d-inline-flex align-items-center gap-1"
-            >
+            <span v-if="car.location" class="text-muted small d-inline-flex align-items-center gap-1">
               <AppIcon name="pin" :size="16" /> {{ car.location }}
             </span>
           </div>
           <h1 class="detail-title">{{ title }}</h1>
 
-          <ImageGallery
-            :images="car.images || []"
-            :car-name="`${car.make} ${car.model}`"
-            class="mb-4"
-          />
+          <ImageGallery :images="car.images || []" :car-name="`${car.make} ${car.model}`" class="mb-4" />
 
           <div class="dd-card dd-card-body mb-4">
             <h2 class="h3 mb-3">Vehicle specifications</h2>
             <dl class="spec-grid">
               <div v-for="spec in specs" :key="spec.label" class="spec">
-                <span class="dd-icon-circle"><AppIcon :name="spec.icon" /></span>
+                <span class="dd-icon-circle">
+                  <AppIcon :name="spec.icon" />
+                </span>
                 <div>
                   <dt>{{ spec.label }}</dt>
                   <dd>{{ spec.value }}</dd>
@@ -231,10 +231,8 @@ const statusLabel = computed(() => {
 
           <!-- Yati - price history chart (D/HD) -->
           <PriceHistoryChart
-            :listing-id="car.listing_id"
-            :current-price="Number(car.price)"
-            class="dd-card dd-card-body mt-4"
-          />
+:listing-id="car.listing_id" :current-price="Number(car.price)"
+            class="dd-card dd-card-body mt-4" />
         </div>
 
         <!-- Price, seller and contact -->
@@ -243,19 +241,12 @@ const statusLabel = computed(() => {
             <div class="dd-card dd-card-body mb-3">
               <p class="text-muted small mb-1">Asking price</p>
               <p class="car-price mb-3">RM {{ formatNumber(car.price) }}</p>
-              <LikeButton
-                :listing-id="car.listing_id"
-                :likes="Number(car.likes ?? 0)"
-                :liked="Boolean(car.liked)"
-              />
+              <LikeButton :listing-id="car.listing_id" :likes="Number(car.likes ?? 0)" :liked="Boolean(car.liked)" />
 
               <!-- Yati - watch this car's price (D/HD) -->
               <WatchButton
-                :listing-id="car.listing_id"
-                :price="Number(car.price)"
-                :seller-id="Number(car.seller_id)"
-                class="mt-3"
-              />
+:listing-id="car.listing_id" :price="Number(car.price)" :seller-id="Number(car.seller_id)"
+                class="mt-3" />
             </div>
 
             <div class="dd-card dd-card-body mb-3">
@@ -284,9 +275,8 @@ const statusLabel = computed(() => {
                   This is your listing, so you can't send it an enquiry.
                 </p>
                 <router-link
-                  :to="{ name: 'edit-listing', params: { id: car.listing_id } }"
-                  class="btn btn-outline-primary w-100"
-                >
+:to="{ name: 'edit-listing', params: { id: car.listing_id } }"
+                  class="btn btn-outline-primary w-100">
                   <AppIcon name="edit" :size="18" /> Edit listing
                 </router-link>
               </template>
@@ -300,9 +290,8 @@ const statusLabel = computed(() => {
                   <p class="text-muted small">Please log in to contact the seller.</p>
 
                   <router-link
-                    :to="{ name: 'login', query: { redirect: `/cars/${car.listing_id}` } }"
-                    class="btn btn-primary w-100"
-                  >
+:to="{ name: 'login', query: { redirect: `/cars/${car.listing_id}` } }"
+                    class="btn btn-primary w-100">
                     Log in to enquire
                   </router-link>
                 </div>
@@ -312,15 +301,9 @@ const statusLabel = computed(() => {
                     <label for="sellerMessage" class="form-label">Your message</label>
 
                     <textarea
-                      id="sellerMessage"
-                      v-model.trim="message"
-                      class="form-control"
-                      rows="5"
-                      minlength="10"
-                      maxlength="1000"
-                      placeholder="Hi, I'm interested in this car. Is it still available?"
-                      required
-                    ></textarea>
+id="sellerMessage" v-model.trim="message" class="form-control" rows="5" minlength="10"
+                      maxlength="1000" placeholder="Hi, I'm interested in this car. Is it still available?"
+                      required></textarea>
 
                     <div class="form-text">Minimum 10 characters.</div>
                   </div>
@@ -334,11 +317,7 @@ const statusLabel = computed(() => {
                   </div>
 
                   <button type="submit" class="btn btn-primary w-100" :disabled="isSending">
-                    <span
-                      v-if="isSending"
-                      class="spinner-border spinner-border-sm"
-                      aria-hidden="true"
-                    ></span>
+                    <span v-if="isSending" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
                     {{ isSending ? 'Sending...' : 'Send enquiry' }}
                   </button>
                 </form>
@@ -349,7 +328,9 @@ const statusLabel = computed(() => {
       </div>
 
       <div v-else class="dd-empty" role="alert">
-        <span class="dd-icon-circle"><AppIcon name="car" :size="28" /></span>
+        <span class="dd-icon-circle">
+          <AppIcon name="car" :size="28" />
+        </span>
         <h1 class="h3">Car not found</h1>
         <p>This car listing could not be found.</p>
         <router-link :to="{ name: 'cars' }" class="btn btn-primary">Browse cars</router-link>
