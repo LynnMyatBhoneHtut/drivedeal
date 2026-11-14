@@ -317,7 +317,7 @@ class="progress mb-3" style="height: 8px" role="progressbar" :aria-valuenow="car
             </p>
 
             <p class="text-muted small">
-              {{ car.year }} Â·
+              {{ car.year }} ·
               {{ formatNumber(car.mileage_km) }} km
             </p>
 
@@ -345,7 +345,7 @@ v-for="factor in getScoreDetails(car)" :key="factor.key"
                 <div class="small">
                   <strong>{{ factor.label }}</strong>
                   <div class="text-muted">
-                    {{ factor.score }}/100 Ã— {{ factor.weight }}% importance
+                    {{ factor.score }}/100 × {{ factor.weight }}% importance
                   </div>
                 </div>
 
