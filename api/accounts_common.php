@@ -7,6 +7,53 @@
  * Written for older PHP too (no ?? or typed params), like helpers.php.
  */
 
+/*
+ * password_hash() / password_verify() only exist from PHP 5.5. Mercury runs an older PHP,
+ * so these stand-ins are used there. They make the same bcrypt "$2y$10$..." hashes with
+ * crypt(), so passwords made on a newer PHP (laptops, the sample data) still work and the
+ * other way round. On PHP 5.5+ the real functions exist and these are skipped.
+ */
+if (!defined('PASSWORD_DEFAULT')) {
+  define('PASSWORD_BCRYPT', 1);
+  define('PASSWORD_DEFAULT', PASSWORD_BCRYPT);
+}
+
+if (!function_exists('password_hash')) {
+  function password_hash($password, $algo, $options = array()) {
+    $cost = isset($options['cost']) ? (int) $options['cost'] : 10;
+    $bytes = function_exists('openssl_random_pseudo_bytes') ? openssl_random_pseudo_bytes(16) : '';
+    if (strlen($bytes) < 16) {
+      $bytes = '';
+      for ($i = 0; $i < 16; $i++) $bytes .= chr(mt_rand(0, 255));
+    }
+    // bcrypt wants a 22-character salt from ./A-Za-z0-9
+    $salt = substr(strtr(base64_encode($bytes), '+', '.'), 0, 22);
+    $hash = crypt($password, sprintf('$2y$%02d$', $cost) . $salt);
+    return (is_string($hash) && strlen($hash) === 60) ? $hash : false;
+  }
+}
+
+if (!function_exists('password_verify')) {
+  function password_verify($password, $hash) {
+    $check = crypt($password, $hash);
+    if (!is_string($check) || strlen($check) !== strlen($hash) || strlen($hash) < 13) return false;
+    // Compare every character so the time taken doesn't give the hash away
+    $diff = 0;
+    for ($i = 0; $i < strlen($hash); $i++) $diff |= ord($check[$i]) ^ ord($hash[$i]);
+    return $diff === 0;
+  }
+}
+
+/**
+ * Length of a text in characters. Mercury's PHP has no mbstring, so without mb_strlen()
+ * count UTF-8 characters with a regular expression instead of bytes ("Zoë" = 3).
+ */
+function account_text_length($text) {
+  if (function_exists('mb_strlen')) return mb_strlen($text, 'UTF-8');
+  $count = preg_match_all('/./us', $text, $unused);
+  return $count === false ? strlen($text) : $count;
+}
+
 /** Columns that are safe to send back - never password_hash. */
 define('USER_PUBLIC_COLUMNS', 'user_id, full_name, email, phone, role, created_at');
 
@@ -37,7 +84,7 @@ function validate_profile_fields($fullName, $email, $phone) {
 
   if ($fullName === '') {
     $errors['full_name'] = 'Full name is required.';
-  } elseif (mb_strlen($fullName) < 2 || mb_strlen($fullName) > 100) {
+  } elseif (account_text_length($fullName) < 2 || account_text_length($fullName) > 100) {
     $errors['full_name'] = 'Full name must be 2 to 100 characters.';
   } elseif (!preg_match("/^[\\p{L} .'-]+$/u", $fullName)) {
     $errors['full_name'] = 'Full name can only contain letters, spaces, apostrophes, dots and hyphens.';

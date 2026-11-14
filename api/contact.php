@@ -1,4 +1,3 @@
-
 <?php
 // Contact form API - OWNER: Lai
 // Handles messages from the About/Contact page.
