@@ -9,13 +9,69 @@ const form = reactive({
   message: ''
 })
 
+// Field-specific validation messages displayed next to each input.
+const fieldErrors = reactive({
+  name: '',
+  email: '',
+  message: ''
+})
+
+function validateField(field) {
+  const value = form[field].trim()
+  let error = ''
+
+  if (field === 'name') {
+    if (!value) {
+      error = 'Please enter your full name.'
+    } else if (value.length > 100) {
+      error = 'Name must not exceed 100 characters.'
+    }
+  } else if (field === 'email') {
+    if (!value) {
+      error = 'Please enter your email address.'
+    } else if (value.length > 150 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      error = 'Please enter a valid email address.'
+    }
+  } else if (field === 'message') {
+    if (!value) {
+      error = 'Please enter your message.'
+    } else if (value.length < 10) {
+      error = 'Message must contain at least 10 characters.'
+    } else if (value.length > 2000) {
+      error = 'Message must not exceed 2000 characters.'
+    }
+  }
+
+  fieldErrors[field] = error
+  return !error
+}
+
+function validateForm() {
+  // Validate all fields, not just the first invalid one.
+  return ['name', 'email', 'message']
+    .map(validateField)
+    .every(Boolean)
+}
+
+function revalidateIfNeeded(field) {
+  // Once an error has appeared, remove it as soon as the input becomes valid.
+  if (fieldErrors[field]) {
+    validateField(field)
+  }
+}
+
 const isSubmitting = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 
 async function submitForm() {
+  if (isSubmitting.value) return
+
   successMessage.value = ''
   errorMessage.value = ''
+
+  if (!validateForm()) return
+
   isSubmitting.value = true
 
   try {
@@ -30,6 +86,9 @@ async function submitForm() {
     form.name = ''
     form.email = ''
     form.message = ''
+    fieldErrors.name = ''
+    fieldErrors.email = ''
+    fieldErrors.message = ''
   } catch (error) {
     errorMessage.value = error.message || 'Unable to send your message.'
   } finally {
@@ -132,49 +191,45 @@ const nextSteps = [
                 <AppIcon name="mail" :size="22" /> Send us a message
               </h3>
 
-              <form @submit.prevent="submitForm">
+              <!-- novalidate allows Vue to display inline validation instead of browser pop-ups. -->
+              <form novalidate @submit.prevent="submitForm">
                 <div class="row g-3">
                   <div class="col-12 col-md-6">
                     <label for="contactName" class="form-label">Full name</label>
-                    <input
-                      id="contactName"
-                      v-model.trim="form.name"
-                      type="text"
-                      class="form-control"
-                      placeholder="Your full name"
-                      maxlength="100"
-                      autocomplete="name"
-                      required
-                    />
+                    <input id="contactName" v-model.trim="form.name" type="text" class="form-control"
+                      :class="{ 'is-invalid': fieldErrors.name }" :aria-invalid="Boolean(fieldErrors.name)"
+                      :aria-describedby="fieldErrors.name ? 'contactNameError' : undefined" placeholder="Your full name"
+                      maxlength="100" autocomplete="name" required @blur="validateField('name')"
+                      @input="revalidateIfNeeded('name')" />
+                    <div v-if="fieldErrors.name" id="contactNameError" class="invalid-feedback d-block" role="alert">
+                      {{ fieldErrors.name }}
+                    </div>
                   </div>
 
                   <div class="col-12 col-md-6">
                     <label for="contactEmail" class="form-label">Email address</label>
-                    <input
-                      id="contactEmail"
-                      v-model.trim="form.email"
-                      type="email"
-                      class="form-control"
-                      placeholder="you@example.com"
-                      maxlength="150"
-                      autocomplete="email"
-                      required
-                    />
+                    <input id="contactEmail" v-model.trim="form.email" type="email" class="form-control"
+                      :class="{ 'is-invalid': fieldErrors.email }" :aria-invalid="Boolean(fieldErrors.email)"
+                      :aria-describedby="fieldErrors.email ? 'contactEmailError' : undefined"
+                      placeholder="you@example.com" maxlength="150" autocomplete="email" required
+                      @blur="validateField('email')" @input="revalidateIfNeeded('email')" />
+                    <div v-if="fieldErrors.email" id="contactEmailError" class="invalid-feedback d-block" role="alert">
+                      {{ fieldErrors.email }}
+                    </div>
                   </div>
 
                   <div class="col-12">
                     <label for="contactMessage" class="form-label">Message</label>
-                    <textarea
-                      id="contactMessage"
-                      v-model.trim="form.message"
-                      class="form-control"
-                      rows="5"
-                      minlength="10"
-                      maxlength="2000"
-                      placeholder="Write your message here..."
-                      required
-                    ></textarea>
-                    <div class="form-text">At least 10 characters.</div>
+                    <textarea id="contactMessage" v-model.trim="form.message" class="form-control"
+                      :class="{ 'is-invalid': fieldErrors.message }" :aria-invalid="Boolean(fieldErrors.message)"
+                      :aria-describedby="fieldErrors.message ? 'contactMessageHint contactMessageError' : 'contactMessageHint'"
+                      rows="5" minlength="10" maxlength="2000" placeholder="Write your message here..." required
+                      @blur="validateField('message')" @input="revalidateIfNeeded('message')"></textarea>
+                    <div id="contactMessageHint" class="form-text">At least 10 characters.</div>
+                    <div v-if="fieldErrors.message" id="contactMessageError" class="invalid-feedback d-block"
+                      role="alert">
+                      {{ fieldErrors.message }}
+                    </div>
                   </div>
                 </div>
 
@@ -187,11 +242,7 @@ const nextSteps = [
                 </div>
 
                 <button type="submit" class="btn btn-primary mt-4" :disabled="isSubmitting">
-                  <span
-                    v-if="isSubmitting"
-                    class="spinner-border spinner-border-sm"
-                    aria-hidden="true"
-                  ></span>
+                  <span v-if="isSubmitting" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
                   <AppIcon v-else name="arrow-right" :size="18" />
                   {{ isSubmitting ? 'Sending...' : 'Send message' }}
                 </button>
