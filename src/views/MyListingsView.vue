@@ -11,10 +11,27 @@ import OfferInbox from '../components/OfferInbox.vue'
 import { fetchOffers } from '../services/offersApi'
 import AppIcon from '../components/AppIcon.vue'
 import PageHeader from '../components/PageHeader.vue'
+import Pagination from '../components/Pagination.vue'
 import { apiDelete, apiGet, imageUrl } from '../services/api'
 import { currentUser } from '../services/auth'
 
 const cars = ref([])
+
+// ---- Pagination of the seller's cars (6 per page, the same as Browse) ----
+const PER_PAGE = 6
+const page = ref(1)
+const pagedCars = computed(() => {
+  const start = (page.value - 1) * PER_PAGE
+  return cars.value.slice(start, start + PER_PAGE)
+})
+// After a delete or a new user, stay on a page that still exists
+watch(
+  () => cars.value.length,
+  (count) => {
+    const lastPage = Math.max(1, Math.ceil(count / PER_PAGE))
+    if (page.value > lastPage) page.value = lastPage
+  }
+)
 const loadingCars = ref(false)
 const carsError = ref('')
 
@@ -259,9 +276,11 @@ onBeforeUnmount(() => document.body.classList.remove('modal-open'))
           </ul>
 
           <!-- Cars -->
-          <h2 class="h3 mb-3">Your cars</h2>
-          <div class="row g-4 mb-5">
-            <div v-for="car in cars" :key="car.listing_id" class="col-12 col-sm-6 col-lg-4">
+          <h2 class="h3 mb-3">
+            Your cars <span class="text-muted fw-normal fs-6">({{ cars.length }})</span>
+          </h2>
+          <div class="row g-4">
+            <div v-for="car in pagedCars" :key="car.listing_id" class="col-12 col-sm-6 col-lg-4">
               <article class="listing-card dd-card h-100">
                 <div class="listing-photo">
                   <img
@@ -315,6 +334,9 @@ onBeforeUnmount(() => document.body.classList.remove('modal-open'))
                 </div>
               </article>
             </div>
+          </div>
+          <div class="mb-5">
+            <Pagination v-model:page="page" :total="cars.length" :per-page="PER_PAGE" />
           </div>
         </template>
 
