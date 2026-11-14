@@ -34,7 +34,7 @@ v-if="car.image_path && !imageError" :src="imageUrl(car.image_path)" :alt="carNa
         @error="imageError = true" />
 
       <div v-else class="image-placeholder">
-        <span class="car-icon" aria-hidden="true">🚗</span>
+        <span class="car-icon" aria-hidden="true">ðŸš—</span>
         <span>Photo coming soon</span>
       </div>
 
@@ -68,7 +68,7 @@ v-if="car.image_path && !imageError" :src="imageUrl(car.image_path)" :alt="carNa
 :to="{
         name: 'car-detail',
         params: { id: car.listing_id }
-      }" class="btn btn-dark mt-auto" :aria-label="`View details for ${carName}`">
+      }" class="btn btn-outline-primary mt-auto" :aria-label="`View details for ${carName}`">
         View Details
       </router-link>
     </div>
@@ -77,21 +77,29 @@ v-if="car.image_path && !imageError" :src="imageUrl(car.image_path)" :alt="carNa
 
 <style scoped>
 .car-card {
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1px solid var(--dd-line);
+  border-radius: var(--dd-radius);
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--dd-shadow-sm);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .car-card:hover {
+    transform: translateY(-3px);
+  }
 }
 
 .car-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--dd-shadow-lg);
 }
 
 .car-image {
   position: relative;
   height: 200px;
-  background: #f1f3f5;
+  background: var(--dd-surface);
 }
 
 .car-image img {
@@ -107,7 +115,7 @@ v-if="car.image_path && !imageError" :src="imageUrl(car.image_path)" :alt="carNa
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: #6c757d;
+  color: var(--dd-muted);
 }
 
 .car-icon {
@@ -118,30 +126,31 @@ v-if="car.image_path && !imageError" :src="imageUrl(car.image_path)" :alt="carNa
   position: absolute;
   top: 12px;
   left: 12px;
-  background: white;
+  background: var(--dd-white);
+  color: var(--dd-ink);
   padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
+  border-radius: var(--dd-radius-pill);
+  font-size: 0.8125rem;
+  font-weight: 700;
 }
 
 .car-price {
-  font-size: 22px;
-  font-weight: 700;
-  color: #198754;
+  font-size: 1.375rem;
+  font-weight: 800;
+  color: var(--dd-primary);
 }
 
 .car-info {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  color: #6c757d;
-  font-size: 14px;
+  color: var(--dd-muted);
+  font-size: 0.875rem;
 }
 
 .car-info span {
-  background: #f8f9fa;
+  background: var(--dd-surface);
   padding: 5px 10px;
-  border-radius: 6px;
+  border-radius: var(--dd-radius-pill);
 }
 </style>
