@@ -1,9 +1,4 @@
-/* DriveDeal design system - blue theme. See design/DESIGN.md.
-   Site-wide tokens, Bootstrap mapping and shared classes live here.
-   Page-specific styles go in each page's own <style scoped> block and use var(--dd-...) only:
-   never hard-code a hex colour in a component. */
 
-/* ---------- 1. Design tokens ---------- */
 :root {
   --dd-primary: #1d5bf0;
   --dd-primary-600: #1449d1;
